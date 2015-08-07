@@ -11,7 +11,7 @@ case class Input(id: Int,
                  units: List[CellUnit],
                  width: Int,
                  height: Int,
-                 filled: List[CellUnit],
+                 filled: List[Cell],
                  sourceLength: Int,
                  sourceSeeds: List[Int])
 
