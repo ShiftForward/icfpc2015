@@ -21,7 +21,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   def isFilled(col: Int, row: Int): Boolean = grid(col)(row)
 
   def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
-    gridState.updated(cell.row, gridState(cell.row).updated(cell.col, value))
+    gridState.updated(cell.col, gridState(cell.col).updated(cell.row, value))
   def filled(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
     updatedInnerGrid(oldGrid, cell, value = true)
   })
