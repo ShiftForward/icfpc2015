@@ -40,4 +40,3 @@ object Submit extends App {
     }
   }
 }
-

@@ -23,13 +23,17 @@ object NaivePowerPhrasesSolver extends Solver {
     "Yuggoth") // from problem 7 grid
 
   def play(initialState: GameState) = {
-    val commandsIter = Iterator.continually("Ei! ".toIterator).flatten
+    val commandsIter = Iterator.continually(knownWords.mkString.toIterator).flatten
 
-    def fillUntilGameOver(state: GameState, history: List[Char] = Nil): List[Char] =
-      if (state.gameOver) history.reverse
-      else {
+    def fillUntilGameOver(state: GameState, prevState: GameState = null, history: List[Char] = Nil): List[Char] =
+      if (state.gameOver && state.score.currentScore == 0) {
+        // revert to the previous state and try with the next command
+        fillUntilGameOver(prevState, null, history.tail)
+      } else if (state.gameOver) {
+        history.reverse
+      } else {
         val next = commandsIter.next()
-        fillUntilGameOver(state.nextState(next), next :: history)
+        fillUntilGameOver(state.nextState(next), state, next :: history)
       }
 
     fillUntilGameOver(initialState).map(Command.char)

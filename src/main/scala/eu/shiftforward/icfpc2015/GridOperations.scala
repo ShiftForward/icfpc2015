@@ -19,7 +19,7 @@ object GridOperations {
 
   def removeLines(grid: Grid): (Grid, Int) = {
     val removedGrid = grid.grid.filterNot(_.forall(identity))
-    val removedLines = grid.height - removedGrid.size
+    val removedLines = grid.height - removedGrid.length
     (grid.copy(grid = Array.ofDim[Boolean](removedLines, grid.width) ++ removedGrid), removedLines)
   }
 
