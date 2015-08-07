@@ -18,19 +18,23 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     (cell.x + dir.x, cell.y + dir.y)
   }
 
-  def aggHeight: Int = (0 to width).maxBy(c => column(c).indexWhere(identity))
-  def completeLines: Int = (0 to height).count { r => row(r).forall(identity) }
+  def aggHeight: Int = {
+    val heighestRow = (0 until width).maxBy(c => column(c).indexWhere(identity))
+    if (heighestRow == 0) 0 else height - heighestRow
+  }
+
+  def fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
 
   def holes: Int = ???
-  def bumpines: Int = ???
+  def bumpiness: Int = ???
 
-  def column(c: Int): Array[Boolean] = grid(c)
-  def row(r: Int): Array[Boolean] = grid.map(_(r))
+  def row(c: Int): Array[Boolean] = grid.map(_(c))
+  def column(r: Int): Array[Boolean] = grid(r)
 
-  def isFilled(col: Int, row: Int): Boolean = grid(col)(row)
+  def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
   def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
-    gridState.updated(cell.col, gridState(cell.col).updated(cell.row, value))
+    gridState.updated(cell.row, gridState(cell.row).updated(cell.col, value))
 
   def filled(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
     updatedInnerGrid(oldGrid, cell, value = true)
@@ -42,7 +46,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
 }
 
 object Grid {
-  def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](width, height))
+  def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](height, width))
 }
 
 case class Cube(x: Int, y: Int, z: Int) {
