@@ -23,9 +23,11 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
 
   def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
     gridState.updated(cell.col, gridState(cell.col).updated(cell.row, value))
+
   def filled(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
     updatedInnerGrid(oldGrid, cell, value = true)
   })
+
   def removed(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
     updatedInnerGrid(oldGrid, cell, value = false)
   })
@@ -36,8 +38,8 @@ object Grid {
 }
 
 case class Cube(x: Int, y: Int, z: Int) {
-  def rotate60R = Cube(-z, -x, -y)
-  def rotate60L = Cube(-y, -z, -x)
+  def rotateCW = Cube(-z, -x, -y)
+  def rotateCCW = Cube(-y, -z, -x)
 }
 
 case class Cell(x: Int, y: Int) {
@@ -52,23 +54,23 @@ case class Cell(x: Int, y: Int) {
     Cube(x, y, z)
   }
 
-  def rotate60L(pivot: Cell) = {
+  def rotateCCW(pivot: Cell) = {
     val pivotCube = pivot.cube
     val cellCube = this.cube
 
     val centered = Cube(
-      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotate60L
+      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotateCCW
 
     Cell(
       Cube(centered.x + pivotCube.x, centered.y + pivotCube.y, centered.z + pivotCube.z))
   }
 
-  def rotate60R(pivot: Cell) = {
+  def rotateCW(pivot: Cell) = {
     val pivotCube = pivot.cube
     val cellCube = this.cube
 
     val centered = Cube(
-      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotate60R
+      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotateCW
 
     Cell(
       Cube(centered.x + pivotCube.x, centered.y + pivotCube.y, centered.z + pivotCube.z))
@@ -85,9 +87,9 @@ object Cell {
 }
 
 case class CellUnit(members: List[Cell], pivot: Cell) {
-  def rotate60L = CellUnit(members.map(_.rotate60L(pivot)), pivot)
+  def rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
-  def rotate60R = CellUnit(members.map(_.rotate60R(pivot)), pivot)
+  def rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)
 }
 
 case class Input(id: Int,

@@ -1,6 +1,6 @@
 package eu.shiftforward.icfpc2015.model
 
-trait Command {
+sealed trait Command {
   def toChar: Char
 }
 
