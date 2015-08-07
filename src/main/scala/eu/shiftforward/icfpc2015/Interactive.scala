@@ -16,7 +16,7 @@ object Interactive extends App {
     println(s"Stats\tH ${state.grid.aggHeight} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness}")
     println(s"Current Score: ${state.score.currentScore}")
 
-    println(GameStateRenderer.asString(state.grid, state.currentUnitPos))
+    println(GameStateRenderer.asString(state))
 
     if (state.gameOver) println("GAME OVER")
     else readLine("> ") match {
