@@ -14,7 +14,7 @@ object GameStateRenderer {
 
     val header = "    " + (0 until grid.width).map { x => f"$x%02d" }.mkString("  ") + "\n"
 
-    header + (0 until grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
+    "\n" + header + (0 until grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
   }
 }
 
