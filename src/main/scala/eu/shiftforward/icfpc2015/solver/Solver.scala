@@ -1,7 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015.GameState
-import eu.shiftforward.icfpc2015.model.Command
+import eu.shiftforward.icfpc2015.model.{ CellUnit, Command }
 
 trait Solver {
   def play(initialState: GameState): Seq[Command]
@@ -33,5 +33,28 @@ object NaivePowerPhrasesSolver extends Solver {
       }
 
     fillUntilGameOver(initialState).map(Command.char)
+  }
+}
+
+object SmartSolver extends Solver {
+  def play(initialState: GameState): Seq[Command] = {
+    def playAux(state: GameState, commands: Seq[Command]): Seq[Command] =
+      if (state.gameOver) commands
+      else {
+        possibleTargets(initialState).map(t => findPath(initialState, t)).find(_.isEmpty).flatten match {
+          case Some(p) => playAux(state.nextState(p), commands ++ p)
+          case None => commands
+        }
+      }
+
+    playAux(initialState, Nil)
+  }
+
+  def findPath(state: GameState, dst: CellUnit): Option[List[Command]] = {
+    None
+  }
+
+  def possibleTargets(state: GameState): Stream[CellUnit] = {
+    Stream.empty[CellUnit]
   }
 }

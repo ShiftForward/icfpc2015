@@ -15,7 +15,7 @@ case class GameState(
     if (!units.hasNext)
       GameState(nextGrid, units, None, gameOver = true, nextScore)
     else {
-      initialPosition(units.next(), grid) match {
+      initialPosition(units.next(), nextGrid) match {
         case None =>
           GameState(nextGrid, units, None, gameOver = true, nextScore)
         case nextPos =>
@@ -24,9 +24,10 @@ case class GameState(
     }
   }
 
-  def nextState(move: Char): GameState = currentUnitPos match {
+  def nextState(move: Char): GameState = nextState(Command.char(move))
+
+  def nextState(command: Command): GameState = currentUnitPos match {
     case Some(pos) =>
-      val command = Command.char(move)
       transform(pos, command, grid) match {
         case None =>
           val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))
@@ -43,6 +44,10 @@ case class GameState(
   }
 
   def nextState(moves: String): GameState =
+    if (moves.isEmpty) this
+    else nextState(moves.head).nextState(moves.tail)
+
+  def nextState(moves: Seq[Command]): GameState =
     if (moves.isEmpty) this
     else nextState(moves.head).nextState(moves.tail)
 

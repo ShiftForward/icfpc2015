@@ -126,7 +126,7 @@ case class Input(id: Int,
                  sourceSeeds: List[Int]) {
 
   def orderedUnitsByGame(idx: Int) = orderedUnitsBySeed(sourceSeeds(idx))
-  def orderedUnitsBySeed(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length))
+  def orderedUnitsBySeed(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length)).take(sourceLength)
 }
 
 object Input {
