@@ -26,14 +26,16 @@ object NaivePowerPhrasesSolver extends Solver {
     val commandsIter = Iterator.continually(knownWords.mkString.toIterator).flatten
 
     def fillUntilGameOver(state: GameState, prevState: GameState = null, history: List[Char] = Nil): List[Char] =
-      if (state.gameOver && state.score.currentScore == 0) {
-        // revert to the previous state and try with the next command
-        fillUntilGameOver(prevState, null, history.tail)
-      } else if (state.gameOver) {
-        history.reverse
-      } else {
-        val next = commandsIter.next()
-        fillUntilGameOver(state.nextState(next), state, next :: history)
+      state.status match {
+        case GameState.GameOver => history.reverse
+
+        case GameState.Failed =>
+          // revert to the previous state and try with the next command
+          fillUntilGameOver(prevState, null, history.tail)
+
+        case GameState.Running =>
+          val next = commandsIter.next()
+          fillUntilGameOver(state.nextState(next), state, next :: history)
       }
 
     fillUntilGameOver(initialState).map(Command.char)
