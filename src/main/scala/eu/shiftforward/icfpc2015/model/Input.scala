@@ -51,11 +51,27 @@ case class Cell(x: Int, y: Int) {
     Cube(x, y, z)
   }
 
-  def rotate60L(pivot: Cell) = Cell(
-    Cell(this.x - pivot.x, this.y - pivot.y).cube.rotate60L)
+  def rotate60L(pivot: Cell) = {
+    val pivotCube = pivot.cube
+    val cellCube = this.cube
 
-  def rotate60R(pivot: Cell) = Cell(
-    Cell(this.x - pivot.x, this.y - pivot.y).cube.rotate60R)
+    val centered = Cube(
+      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotate60L
+
+    Cell(
+      Cube(centered.x + pivotCube.x, centered.y + pivotCube.y, centered.z + pivotCube.z))
+  }
+
+  def rotate60R(pivot: Cell) = {
+    val pivotCube = pivot.cube
+    val cellCube = this.cube
+
+    val centered = Cube(
+      cellCube.x - pivotCube.x, cellCube.y - pivotCube.y, cellCube.z - pivotCube.z).rotate60R
+
+    Cell(
+      Cube(centered.x + pivotCube.x, centered.y + pivotCube.y, centered.z + pivotCube.z))
+  }
 }
 
 object Cell {
