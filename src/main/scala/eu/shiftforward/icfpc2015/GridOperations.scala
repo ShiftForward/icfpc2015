@@ -11,6 +11,9 @@ trait GridOperations {
     else None
   }
 
+  def validateTransform(unitPos: UnitPos, prevStates: Set[UnitPos]): Boolean =
+    !prevStates.contains(unitPos)
+
   def lockCell(unitPos: UnitPos, grid: Grid): Grid =
     grid.filled(unitPos.cells.toList: _*)
 
