@@ -12,7 +12,7 @@ trait GridOperations {
   }
 
   def lockCell(unitPos: UnitPos, grid: Grid): Grid =
-    grid.filled(unitPos.cells: _*)
+    grid.filled(unitPos.cells.toList: _*)
 
   def removeLines(grid: Grid): Grid = {
     val removedGrid = grid.grid.filterNot(_.forall(identity))

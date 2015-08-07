@@ -103,7 +103,7 @@ object Cell {
   }
 }
 
-case class CellUnit(members: List[Cell], pivot: Cell) {
+case class CellUnit(members: Set[Cell], pivot: Cell) {
   def rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
   def rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)

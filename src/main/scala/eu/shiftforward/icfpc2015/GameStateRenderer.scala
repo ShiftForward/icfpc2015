@@ -45,5 +45,5 @@ object GameStateRenderer {
 }
 
 object GameStateRendererTest extends App {
-  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3)), Some(UnitPos(CellUnit(List(Cell(0, 0)), Cell(0, 1)), Cell(9, 1)))))
+  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3)), Some(UnitPos(CellUnit(Set(Cell(0, 0)), Cell(0, 1)), Cell(9, 1)))))
 }
