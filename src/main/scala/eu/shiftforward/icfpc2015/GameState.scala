@@ -26,7 +26,7 @@ case class GameState(
 
   def nextState(move: Char): GameState = currentUnitPos match {
     case Some(pos) =>
-      val command = Command(move)
+      val command = Command.char(move)
       transform(pos, command, grid) match {
         case None =>
           val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))

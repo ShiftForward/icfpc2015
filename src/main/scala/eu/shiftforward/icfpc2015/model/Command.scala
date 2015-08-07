@@ -16,7 +16,7 @@ object Command {
 
   def string(str: String) = str.map(char).toList
 
-  def char(ch: Char) = Command(ch)
+  def char(ch: Char) = Command(ch.toLower)
 
   val mappings = Map(
     MoveW -> List('p', ''', '!', '.', '0', '3'),
