@@ -53,8 +53,11 @@ object Cell {
   }
 }
 
-case class CellUnit(members: List[Cell],
-                    pivot: Cell)
+case class CellUnit(members: List[Cell], pivot: Cell) {
+  def rotate60L = CellUnit(members.map(_.rotate60L(pivot)), pivot)
+
+  def rotate60R = CellUnit(members.map(_.rotate60R(pivot)), pivot)
+}
 
 case class Input(id: Int,
                  units: List[CellUnit],
