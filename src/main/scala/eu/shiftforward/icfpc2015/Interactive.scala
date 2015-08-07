@@ -10,7 +10,7 @@ object Interactive extends App with GridOperations {
   val units = input.orderedUnitsBySeed(input.sourceSeeds.head)
 
   def loop(grid: Grid, currentUnitPos: Option[UnitPos]): Unit = {
-    println(s"Stats\tH ${grid.aggHeight} CL ${grid.fullLines}")
+    println(s"Stats\tH ${grid.aggHeight} CL ${grid.fullLines} HO ${grid.holes} BP ${grid.bumpiness}")
 
     val state = GameStateRenderer.asString(grid, currentUnitPos)
     println(state)

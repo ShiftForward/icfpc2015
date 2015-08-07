@@ -18,18 +18,20 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     (cell.x + dir.x, cell.y + dir.y)
   }
 
-  def aggHeight: Int = {
-    val heighestRow = (0 until width).maxBy(c => column(c).indexWhere(identity))
-    if (heighestRow == 0) 0 else height - heighestRow
+  lazy val aggHeight: Int = {
+    val highestRow = (0 until height).indexWhere(idx => row(idx).exists(identity))
+    if (highestRow < 0) 0 else height - highestRow
   }
 
-  def fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
+  lazy val fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
+  lazy val holes: Int = (0 until width).map { c => column(c).dropWhile(p => !p).count(p => !p) }.sum
+  lazy val bumpiness: Int = {
+    val heights = (0 until width).map(c => column(c).indexWhere(identity))
+    heights.zip(heights.drop(1)).map { case (s, d) => math.abs(d - s) }.sum
+  }
 
-  def holes: Int = ???
-  def bumpiness: Int = ???
-
-  def row(c: Int): Array[Boolean] = grid.map(_(c))
-  def column(r: Int): Array[Boolean] = grid(r)
+  def row(r: Int): Array[Boolean] = grid(r)
+  def column(c: Int): Array[Boolean] = grid.map(_(c))
 
   def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
