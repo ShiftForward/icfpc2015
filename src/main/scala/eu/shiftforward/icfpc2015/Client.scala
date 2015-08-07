@@ -5,7 +5,7 @@ import java.io.ByteArrayInputStream
 import spray.json._
 import spray.json.DefaultJsonProtocol._
 import com.typesafe.config.ConfigFactory
-import eu.shiftforward.icfpc2015.model.{ Command, Output }
+import eu.shiftforward.icfpc2015.model.Output
 import scala.sys.process._
 
 object Client {
@@ -18,13 +18,8 @@ object Client {
     |-H Content-Type:application/json
     |-d @- https://davar.icfpcontest.org/teams/$teamId/solutions""".stripMargin.replaceAll("\n", " ")
 
-  def submit(sols: List[Output]) = {
+  def submit(sols: Seq[Output]) = {
     val input = new ByteArrayInputStream(sols.toJson.compactPrint.getBytes)
     (curlCommand #< input).!!
   }
-}
-
-object ClientExample extends App {
-  val sol = (0 to 23).map { i => Output(i, 0, "test", Command.string("Ei!")) }.toList
-  println(Client.submit(sol))
 }
