@@ -36,7 +36,7 @@ trait GridOperations {
     }
   }
 
-  def transformUnitPos(unitPos: UnitPos, command: Command): UnitPos = command match {
+  def transformUnitPos(unitPos: UnitPos, command: Command): UnitPos = command.action match {
     case MoveW => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - 1))
     case MoveE => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x + 1))
     case MoveSW => unitPos.copy(pos = unitPos.pos.copy(y = unitPos.pos.y + 1))
