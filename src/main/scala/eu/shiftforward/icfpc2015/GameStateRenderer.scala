@@ -46,10 +46,12 @@ object GameStateRenderer {
   }
 
   def stateAsString(state: GameState) = {
+    val previousCommands = "Previous commands: " + state.commandHistory.map(_.ch).mkString
+
     val statsHeader =
       s"Stats\tH ${state.grid.aggHeight} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness}\n" +
         s"Current Score: ${state.score.currentScore}"
 
-    statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos))
+    previousCommands + "\n" + statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos))
   }
 }

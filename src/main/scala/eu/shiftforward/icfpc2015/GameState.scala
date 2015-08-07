@@ -9,41 +9,47 @@ case class GameState(
     units: Seq[CellUnit],
     unitPosState: Option[UnitPosState],
     status: Status,
-    score: Score = Score()) {
-
-  def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
-    units match {
-      case h :: t =>
-        initialPosition(h, nextGrid) match {
-          case None =>
-            GameState(nextGrid, t, None, GameOver, nextScore)
-          case Some(nextPos) =>
-            GameState(nextGrid, t, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore)
-        }
-      case _ =>
-        GameState(nextGrid, units, None, GameOver, nextScore)
-    }
-  }
+    score: Score = Score(),
+    commandHistory: Vector[Command] = Vector()) {
 
   def nextState(move: Char): GameState = nextState(Command.char(move))
 
-  def nextState(command: Command): GameState = unitPosState match {
-    case Some(prevState @ UnitPosState(pos, _)) =>
-      transform(pos, command, grid) match {
-        case None =>
-          val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))
-          val nextScore = score.update(pos.cells.size, removedLines)
-          getNextUnitPos(nextGrid, nextScore)
-        case nextPosOpt @ Some(nextPos) =>
-          val updatedUnitState = prevState.update(nextPos)
-          if (updatedUnitState.valid)
-            GameState(grid, units, Some(updatedUnitState), status, score)
-          else
-            GameState(grid, units, None, Failed, Score())
+  def nextState(command: Command): GameState = {
+    val nextCommandHistory = commandHistory :+ command
+
+    def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
+      units match {
+        case h :: t =>
+          initialPosition(h, nextGrid) match {
+            case None =>
+              GameState(nextGrid, t, None, GameOver, nextScore, nextCommandHistory)
+            case Some(nextPos) =>
+              GameState(nextGrid, t, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore, nextCommandHistory)
+          }
+        case _ =>
+          GameState(nextGrid, units, None, GameOver, nextScore, nextCommandHistory)
       }
-    case None =>
-      println("We shouldn't have gotten here!")
-      getNextUnitPos(grid, score)
+    }
+
+    unitPosState match {
+      case Some(prevState @ UnitPosState(pos, _)) =>
+        transform(pos, command, grid) match {
+          case None =>
+            val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))
+            val nextScore = score.update(pos.cells.size, removedLines)
+            getNextUnitPos(nextGrid, nextScore)
+
+          case nextPosOpt @ Some(nextPos) =>
+            val updatedUnitState = prevState.update(nextPos)
+            if (updatedUnitState.valid)
+              GameState(grid, units, Some(updatedUnitState), status, score, nextCommandHistory)
+            else
+              GameState(grid, units, None, Failed, Score(), nextCommandHistory)
+        }
+      case None =>
+        println("We shouldn't have gotten here!")
+        getNextUnitPos(grid, score)
+    }
   }
 
   def nextState(moves: String): GameState =
