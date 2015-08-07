@@ -40,9 +40,12 @@ object GameStateRenderer {
       (if (row % 2 == 1) f"$row%02d:   " else f"$row%02d: ") +
         (0 until state.grid.width).map { col => renderCell(col, row) }.mkString(" ")
 
+    val statsHeader =
+      s"Stats\tH ${state.grid.aggHeight} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness}\n" +
+        s"Current Score: ${state.score.currentScore}"
+
     val header = "    " + (0 until state.grid.width).map { x => f"$x%02d" }.mkString("  ") + "\n"
 
-    "\n" + header + (0 until state.grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
-    header + (0 until state.grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
+    statsHeader + "\n" + header + (0 until state.grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
   }
 }
