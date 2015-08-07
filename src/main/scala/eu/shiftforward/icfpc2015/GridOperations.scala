@@ -21,7 +21,10 @@ trait GridOperations {
     val leftShift = Math.floor((grid.width - unitWidth) / 2).toInt
     val x = Math.max(0, leftShift + unitPos.pivot.row)
     val y = Math.max(0, topLeft.col + unitPos.pivot.col)
-    Some(UnitPos(unitPos, Cell(x, y)))
+
+    val initialCellUnit = UnitPos(unitPos, Cell(x, y))
+    if (fits(initialCellUnit, grid)) Some(initialCellUnit)
+    else None
   }
 
   def fits(unitPos: UnitPos, grid: Grid): Boolean = {
