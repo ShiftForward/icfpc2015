@@ -1,5 +1,6 @@
 package eu.shiftforward.icfpc2015.model
 
+import eu.shiftforward.icfpc2015.Utils
 import spray.json.DefaultJsonProtocol._
 
 case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
@@ -95,7 +96,10 @@ case class Input(id: Int,
                  height: Int,
                  filled: List[Cell],
                  sourceLength: Int,
-                 sourceSeeds: List[Int])
+                 sourceSeeds: List[Int]) {
+
+  def orderedUnits(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length))
+}
 
 object Input {
   implicit val cellJsonFormat = jsonFormat2(Cell.apply)
