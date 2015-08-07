@@ -27,23 +27,23 @@ object NaivePowerPhrasesSolver extends Solver {
 
     def fillUntilGameOver(state: GameState,
                           nextCommands: List[Char],
-                          prevState: GameState = null): Seq[Command] = {
+                          prevWordState: GameState): Seq[Command] = {
 
       state.status match {
         case GameState.GameOver => state.commandHistory
 
         case GameState.Failed =>
-          // revert to the previous state and try with the next command
-          fillUntilGameOver(prevState, wordsIter.next(), null)
+          // revert to the state at the end of the previous word and try the next power phrase
+          fillUntilGameOver(prevWordState, wordsIter.next(), prevWordState)
 
         case GameState.Running => nextCommands match {
-          case Nil => fillUntilGameOver(state, wordsIter.next(), prevState)
-          case next :: tail => fillUntilGameOver(state.nextState(next), tail, state)
+          case Nil => fillUntilGameOver(state, wordsIter.next(), state)
+          case next :: tail => fillUntilGameOver(state.nextState(next), tail, prevWordState)
         }
       }
     }
 
-    fillUntilGameOver(initialState, wordsIter.next())
+    fillUntilGameOver(initialState, wordsIter.next(), initialState)
   }
 }
 
