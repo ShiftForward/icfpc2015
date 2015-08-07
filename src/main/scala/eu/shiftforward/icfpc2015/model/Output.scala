@@ -5,7 +5,7 @@ import spray.json.DefaultJsonProtocol._
 
 case class Output(problemId: Int,
                   seed: Int,
-                  tag: String,
+                  tag: Option[String],
                   solution: List[Command])
 
 object Output {

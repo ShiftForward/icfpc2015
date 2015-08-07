@@ -8,7 +8,7 @@ import spray.json._
 import scala.io.Source
 
 object Main extends App {
-  val solutionTag = "test"
+  val solutionTag = None
 
   val sols = new File("problems").listFiles.flatMap { problemFile =>
     val problem = Source.fromFile(problemFile).mkString.parseJson.convertTo[Input]
@@ -20,7 +20,9 @@ object Main extends App {
   }
 
   Client.submit(sols) match {
-    case res if res.contains("created") => println("Solutions submitted successfully")
-    case res => println("A problem happened: " + res)
+    case res if res.contains("created") =>
+      println(s"Solutions submitted successfully" + solutionTag.fold("")(" with tag " + _))
+
+    case res => println(s"A problem happened: $res")
   }
 }
