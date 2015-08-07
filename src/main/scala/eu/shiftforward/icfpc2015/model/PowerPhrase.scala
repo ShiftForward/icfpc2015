@@ -1,27 +1,28 @@
 package eu.shiftforward.icfpc2015.model
 
-class PowerPhrase(text: List[Char]) {
+import scala.collection.mutable
+
+case class PowerPhrase(text: List[Char]) {
   val movements = text.map(Command.char)
   val length = text.length
 }
 
 object PowerPhrase {
-  def getMatching(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
+  def getMatchings(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
     var matching = List[(Int, PowerPhrase)]()
     var matched = Map[PowerPhrase, List[Int]]()
 
     for (i <- source.indices) {
       val command = source(i)
-
-      powerphrases.foreach { target =>
-        matching = matching :+ (0, target)
+      powerphrases.foreach { p =>
+        matching = matching :+ (0, p)
       }
 
       matching = matching.foldLeft(List[(Int, PowerPhrase)]()) {
         case (acc, (idx, power)) =>
 
-          if (command == power.movements(idx)) {
+          if (command.action == power.movements(idx).action) {
             if (idx + 1 == power.movements.length) {
               val startingIdx = i - power.movements.length + 1
 
@@ -37,5 +38,69 @@ object PowerPhrase {
     }
     matched
   }
-}
 
+  def flatten(sourceLength: Int, matchings: Map[PowerPhrase, List[Int]]): Map[Int, PowerPhrase] = {
+    var freePositions = List.fill(sourceLength)(true)
+    val matchingsWithoutOverlaps = matchings.map {
+      case (power, idxs) =>
+        val movementLength = power.movements.length
+
+        val newIndexes = idxs.tail.foldLeft(List(idxs.head)) {
+          case (acc, i) =>
+            if (acc.last + movementLength <= i && i + movementLength - 1 <= sourceLength) {
+              acc :+ i
+            } else {
+              acc
+            }
+        }
+
+        (power, newIndexes)
+    }.toList
+
+    val sortedMatches = matchingsWithoutOverlaps.sortWith {
+      case ((powerA, idxsA), (powerB, idxsB)) =>
+        if (idxsA.length == idxsB.length)
+          powerA.movements.length > powerB.movements.length
+        else
+          idxsA.length > idxsB.length
+    }
+
+    sortedMatches.foldLeft(Map[Int, PowerPhrase]()) {
+      case (acc, (power, idxs)) =>
+
+        val succesfulPlacements = mutable.ArrayBuffer[(Int, PowerPhrase)]()
+
+        idxs foreach { i =>
+          val valid = freePositions.slice(i, i + power.length - 1).reduce(_ && _)
+
+          if (valid) {
+            succesfulPlacements += (i -> power)
+            for (j <- 0 until power.length) {
+              freePositions = freePositions.updated(i + j, false)
+            }
+          }
+        }
+
+        acc ++ succesfulPlacements.toMap
+    }
+  }
+
+  def getBestString(source: List[Command], powerPhrases: List[PowerPhrase]): String = {
+    val matchings = getMatchings(source, powerPhrases)
+    val finalMatchings = flatten(source.length, matchings)
+
+    var result = ""
+    var i = 0
+    while (i < source.length) {
+      finalMatchings.get(i) match {
+        case None =>
+          result += source(i).ch
+          i += 1
+        case Some(power) =>
+          result += power.text.mkString("")
+          i += power.text.length
+      }
+    }
+    result
+  }
+}

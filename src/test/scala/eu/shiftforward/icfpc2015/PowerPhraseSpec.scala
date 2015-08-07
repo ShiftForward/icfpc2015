@@ -6,25 +6,25 @@ import org.specs2.mutable.Specification
 class PowerPhraseSpec extends Specification {
 
   "The PowerPhrase" should {
-    val powerphrase1 = new PowerPhrase("ei!".toList)
-    val powerphrase2 = new PowerPhrase("lae".toList)
-    val powerphrase3 = new PowerPhrase("aa".toList)
-    val powerphrase4 = new PowerPhrase("aeaa".toList)
-    val powerphrase5 = new PowerPhrase("la".toList)
+    val powerphrase1 = PowerPhrase("ei!".toList)
+    val powerphrase2 = PowerPhrase("lae".toList)
+    val powerphrase3 = PowerPhrase("aa".toList)
+    val powerphrase4 = PowerPhrase("aeaa".toList)
+    val powerphrase5 = PowerPhrase("la".toList)
 
     "match power phrases in commands" in {
-      val commandList: List[Command] = Command.string("olaei!ie")
+      val command = Command.string("olaei!ie")
 
-      PowerPhrase.getMatching(commandList, List(powerphrase1)) must be_==(
+      PowerPhrase.getMatchings(command, List(powerphrase1)) must be_==(
         Map(powerphrase1 -> List(3))
       )
 
     }
 
     "match powerphrases n times in command sequentially" in {
-      val commandList: List[Command] = Command.string("laelaelae")
+      val command = Command.string("laelaelae")
 
-      PowerPhrase.getMatching(commandList, List(powerphrase2)) must be_==(
+      PowerPhrase.getMatchings(command, List(powerphrase2)) must be_==(
         Map(
           powerphrase2 -> List(0, 3, 6)
         )
@@ -32,25 +32,57 @@ class PowerPhraseSpec extends Specification {
     }
 
     "match powerphrases n times in command with overlaps" in {
-      val commandList: List[Command] = Command.string("aaaa")
+      val command = Command.string("aaaa")
 
-      PowerPhrase.getMatching(commandList, List(powerphrase3)) must be_==(
+      PowerPhrase.getMatchings(command, List(powerphrase3)) must be_==(
         Map(
           powerphrase3 -> List(0, 1, 2)
         ))
     }
 
     "match several powerphrases" in {
-      val commandList: List[Command] = Command.string("laeaaa")
+      val command = Command.string("laeaaaa")
 
-      PowerPhrase.getMatching(commandList,
+      PowerPhrase.getMatchings(command,
         List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5)) must be_==(
           Map(
             powerphrase2 -> List(0),
             powerphrase5 -> List(0),
             powerphrase4 -> List(1),
-            powerphrase3 -> List(3, 4)
+            powerphrase3 -> List(3, 4, 5)
           ))
+    }
+
+    "flatten in case of overlaps" in {
+      // 1. 1 power phrase with inner overlaps
+      val command = Command.string("aaaa")
+
+      val matchings = PowerPhrase.getMatchings(command, List(powerphrase3))
+
+      PowerPhrase.flatten(command.length, matchings) must beEqualTo {
+        Map(0 -> powerphrase3, 2 -> powerphrase3)
+      }
+
+      // 2. Several power phrases with inner overlaps
+      val command2 = Command.string("laeaaaa")
+      val matchings2 = PowerPhrase.getMatchings(command2,
+        List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5))
+
+      PowerPhrase.flatten(command2.length, matchings2) must beEqualTo {
+        Map(
+          0 -> powerphrase2,
+          3 -> powerphrase3,
+          5 -> powerphrase3
+        )
+      }
+    }
+
+    "convert to a string containing the most power of phrases" in {
+      PowerPhrase.getBestString(Command.string("l4ea4aa"),
+        List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5)) must beEqualTo("laeaaaa")
+
+      PowerPhrase.getBestString(Command.string("aeaaaeaa"),
+        List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5)) must beEqualTo("aeaaaeaa")
     }
   }
 }
