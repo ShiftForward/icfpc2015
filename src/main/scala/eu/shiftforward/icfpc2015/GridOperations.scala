@@ -15,8 +15,14 @@ trait GridOperations {
     grid
   }
 
-  def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] =
-    Some(UnitPos(unitPos, Cell(0, 0)))
+  def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {
+    val (topLeft, bottomRight) = unitPos.boundingBox
+    val unitWidth = bottomRight.col - topLeft.col + 1
+    val leftShift = Math.floor((grid.width - unitWidth) / 2).toInt
+    val x = Math.max(0, leftShift + unitPos.pivot.row)
+    val y = Math.max(0, topLeft.col + unitPos.pivot.col)
+    Some(UnitPos(unitPos, Cell(x, y)))
+  }
 
   def fits(unitPos: UnitPos, grid: Grid): Boolean = {
     unitPos.cells.forall {

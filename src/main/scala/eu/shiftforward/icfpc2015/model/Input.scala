@@ -90,6 +90,12 @@ case class CellUnit(members: List[Cell], pivot: Cell) {
   def rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
   def rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)
+
+  def boundingBox: (Cell, Cell) = {
+    val topLeft = Cell(members.map(_.col).min, members.map(_.row).min)
+    val bottomRight = Cell(members.map(_.col).max, members.map(_.row).max)
+    (topLeft, bottomRight)
+  }
 }
 
 case class Input(id: Int,
