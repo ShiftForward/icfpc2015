@@ -2,10 +2,10 @@ package eu.shiftforward.icfpc2015.model
 
 import spray.json.DefaultJsonProtocol._
 
-class Grid(width: Int, height: Int) {
-  private[this] val grid = Array.ofDim[Boolean](width, height)
+case class Grid(width: Int, height: Int) {
+  val grid = Array.ofDim[Boolean](width, height)
 
-  private[this] val directions = Array(
+  val directions = Array(
     Array(
       Cell(1, 0), Cell(0, -1), Cell(-1, -1),
       Cell(-1, 0), Cell(-1, 1), Cell(0, 1)),
@@ -18,6 +18,8 @@ class Grid(width: Int, height: Int) {
     val dir = directions(parity)(direction)
     (cell.x + dir.x, cell.y + dir.y)
   }
+
+  def filled(col: Int, row: Int): Boolean = grid(col)(row)
 }
 
 case class Cube(x: Int, y: Int, z: Int) {
