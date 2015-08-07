@@ -1,46 +1,40 @@
 package eu.shiftforward.icfpc2015.model
 
-sealed trait Command {
-  def toChar: Char
+case class Command(ch: Char) {
+  def action = Command.invertedMappings(ch)
 }
 
-case class CharCommand(ch: Char) extends Command {
-  def toChar = ch
-}
-
-sealed trait MoveCommand extends Command
-
-case object MoveW extends MoveCommand {
-  def toChar = 'p'
-}
-
-case object MoveE extends MoveCommand {
-  def toChar = 'b'
-}
-
-case object MoveSW extends MoveCommand {
-  def toChar = 'a'
-}
-
-case object MoveSE extends MoveCommand {
-  def toChar = 'l'
-}
-
-sealed trait RotateCommand extends Command
-
-case object RotateCW extends RotateCommand {
-  def toChar = 'd'
-}
-
-case object RotateCCW extends RotateCommand {
-  def toChar = 'k'
-}
+sealed trait Action
+case object MoveW extends Action
+case object MoveE extends Action
+case object MoveSW extends Action
+case object MoveSE extends Action
+case object RotateCW extends Action
+case object RotateCCW extends Action
 
 object Command {
 
   def string(str: String) = str.map(char).toList
 
-  def char(ch: Char) = CharCommand(ch)
+  def char(ch: Char) = Command(ch)
+
+  val mappings = Map(
+    MoveW -> List('p', ''', '!', '.', '0', '3'),
+    MoveE -> List('b', 'c', 'e', 'f', 'y', '2'),
+    MoveSW -> List('a', 'g', 'h', 'i', 'j', '4'),
+    MoveSE -> List('l', 'm', 'n', 'o', ' ', '5'),
+    RotateCW -> List('d', 'q', 'r', 'v', 'z', '1'),
+    RotateCCW -> List('k', 's', 't', 'u', 'w', 'x')
+  )
+
+  val invertedMappings = mappings.flatMap {
+    case (a, chars) =>
+      chars.map { ch =>
+        ch -> a
+      }
+  }
+
+  val all = List(MoveW, MoveE, MoveSW, MoveSE, RotateCW, RotateCCW)
 
   def move(dir: String) = dir match {
     case "W" => MoveW
