@@ -22,7 +22,7 @@ object Interactive extends App with GridOperations {
             val command = Command(ch(0))
             transform(pos, command, grid) match {
               case None => {
-                val nextGrid = lockCell(pos, grid)
+                val nextGrid = removeLines(lockCell(pos, grid))
                 loop(nextGrid, initialPosition(units.next, nextGrid))
               }
               case nextPos => loop(grid, nextPos)

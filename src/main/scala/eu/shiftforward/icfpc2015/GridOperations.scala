@@ -14,6 +14,11 @@ trait GridOperations {
   def lockCell(unitPos: UnitPos, grid: Grid): Grid =
     grid.filled(unitPos.cells: _*)
 
+  def removeLines(grid: Grid): Grid = {
+    val removedGrid = grid.grid.filterNot(_.forall(identity))
+    grid.copy(grid = Array.ofDim[Boolean](grid.height - removedGrid.size, grid.width) ++ removedGrid)
+  }
+
   def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {
     val (topLeft, bottomRight) = unitPos.boundingBox
     val unitWidth = bottomRight.col - topLeft.col + 1
