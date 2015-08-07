@@ -9,12 +9,12 @@ import scala.io.Source
 object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
 
-  val units: Iterator[CellUnit] = input.orderedUnitsBySeed(input.sourceSeeds.head)
+  val units = input.orderedUnitsBySeed(input.sourceSeeds.head)
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
   def loop(state: GameState): Unit = {
-    println(GameStateRenderer.asString(state))
+    println(GameStateRenderer.stateAsString(state))
 
     if (state.gameOver) println("GAME OVER")
     else readLine("> ") match {

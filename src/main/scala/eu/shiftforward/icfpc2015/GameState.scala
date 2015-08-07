@@ -2,44 +2,47 @@ package eu.shiftforward.icfpc2015
 
 import eu.shiftforward.icfpc2015.model._
 import GridOperations._
+import GameState._
 
 case class GameState(
     grid: Grid,
-    units: Iterator[CellUnit],
-    currentUnitPos: Option[UnitPos],
-    gameOver: Boolean,
-    score: Score = Score(),
-    prevStates: Set[UnitPos] = Set()) {
+    units: Seq[CellUnit],
+    unitPosState: Option[UnitPosState],
+    status: Status,
+    score: Score = Score()) {
 
   def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
-    if (!units.hasNext)
-      GameState(nextGrid, units, None, gameOver = true, nextScore)
-    else {
-      initialPosition(units.next(), nextGrid) match {
-        case None =>
-          GameState(nextGrid, units, None, gameOver = true, nextScore)
-        case nextPos =>
-          GameState(nextGrid, units, nextPos, gameOver = false, nextScore, prevStates = Set(nextPos.get))
-      }
+    units match {
+      case h :: t =>
+        initialPosition(h, nextGrid) match {
+          case None =>
+            GameState(nextGrid, t, None, GameOver, nextScore)
+          case Some(nextPos) =>
+            GameState(nextGrid, t, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore)
+        }
+      case _ =>
+        GameState(nextGrid, units, None, GameOver, nextScore)
     }
   }
 
   def nextState(move: Char): GameState = nextState(Command.char(move))
 
-  def nextState(command: Command): GameState = currentUnitPos match {
-    case Some(pos) =>
+  def nextState(command: Command): GameState = unitPosState match {
+    case Some(prevState @ UnitPosState(pos, _)) =>
       transform(pos, command, grid) match {
         case None =>
           val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))
           val nextScore = score.update(pos.cells.size, removedLines)
           getNextUnitPos(nextGrid, nextScore)
         case nextPosOpt @ Some(nextPos) =>
-          if (validateTransform(nextPos, prevStates))
-            GameState(grid, units, nextPosOpt, gameOver = false, score, prevStates + nextPos)
+          val updatedUnitState = prevState.update(nextPos)
+          if (updatedUnitState.valid)
+            GameState(grid, units, Some(updatedUnitState), status, score)
           else
-            GameState(grid, units, None, gameOver = true, Score())
+            GameState(grid, units, None, Failed, Score())
       }
     case None =>
+      println("We shouldn't have gotten here!")
       getNextUnitPos(grid, score)
   }
 
@@ -51,11 +54,36 @@ case class GameState(
     if (moves.isEmpty) this
     else nextState(moves.head).nextState(moves.tail)
 
-  def start() = getNextUnitPos(grid, score)
+  def gameOver = status != Running
+
+  def currentUnitPos = unitPosState.map(_.unitPos)
 }
 
 object GameState {
-  def apply(grid: Grid, units: Iterator[CellUnit]): GameState = {
-    GameState(grid, units, None, gameOver = false).start()
+  sealed trait Status
+  case object Running extends Status
+  case object GameOver extends Status
+  case object Failed extends Status
+
+  case class UnitPosState(unitPos: UnitPos, prevStates: Set[UnitPos] = Set()) {
+    def valid =
+      !prevStates.contains(unitPos)
+
+    def update(newUnitPos: UnitPos) =
+      UnitPosState(newUnitPos, prevStates + unitPos)
+  }
+
+  def apply(grid: Grid, units: Seq[CellUnit]): GameState = {
+    units match {
+      case Nil =>
+        GameState(grid, units, None, GameOver)
+      case h :: t =>
+        initialPosition(h, grid) match {
+          case Some(pos) =>
+            GameState(grid, t, Some(UnitPosState(pos, prevStates = Set(pos))), Running)
+          case None =>
+            GameState(grid, t, None, GameOver)
+        }
+    }
   }
 }
