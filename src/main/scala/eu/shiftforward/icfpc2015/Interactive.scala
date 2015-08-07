@@ -3,8 +3,9 @@ package eu.shiftforward.icfpc2015
 import eu.shiftforward.icfpc2015.model._
 import scala.io.Source
 import spray.json._
+import GridOperations._
 
-object Interactive extends App with GridOperations {
+object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
 
   val units: Iterator[CellUnit] = input.orderedUnitsBySeed(input.sourceSeeds.head)

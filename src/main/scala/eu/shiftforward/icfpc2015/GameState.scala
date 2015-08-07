@@ -1,6 +1,7 @@
 package eu.shiftforward.icfpc2015
 
 import eu.shiftforward.icfpc2015.model._
+import GridOperations._
 
 case class GameState(
     grid: Grid,
@@ -8,7 +9,8 @@ case class GameState(
     currentUnitPos: Option[UnitPos],
     gameOver: Boolean,
     score: Score = Score(),
-    prevStates: Set[UnitPos] = Set()) extends GridOperations {
+    prevStates: Set[UnitPos] = Set()) {
+
   def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
     if (!units.hasNext)
       GameState(nextGrid, units, None, gameOver = true, nextScore)
@@ -47,7 +49,7 @@ case class GameState(
   def start() = getNextUnitPos(grid, score)
 }
 
-object GameState extends GridOperations {
+object GameState {
   def apply(grid: Grid, units: Iterator[CellUnit]): GameState = {
     GameState(grid, units, None, gameOver = false).start()
   }

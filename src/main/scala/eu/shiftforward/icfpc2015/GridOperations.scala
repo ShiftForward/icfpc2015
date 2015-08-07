@@ -2,7 +2,7 @@ package eu.shiftforward.icfpc2015
 
 import eu.shiftforward.icfpc2015.model._
 
-trait GridOperations {
+object GridOperations {
 
   def transform(unitPos: UnitPos, command: Command, grid: Grid): Option[UnitPos] = {
     val transformed = transformUnitPos(unitPos, command)
