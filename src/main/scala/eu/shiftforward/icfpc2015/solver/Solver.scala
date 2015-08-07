@@ -1,7 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015.GameState
-import eu.shiftforward.icfpc2015.model.{ CellUnit, Command }
+import eu.shiftforward.icfpc2015.model.{ Cell, Command }
+import eu.shiftforward.icfpc2015.{ GameState, GridOperations, UnitPos }
 
 trait Solver {
   def play(initialState: GameState): Seq[Command]
@@ -50,11 +50,29 @@ object SmartSolver extends Solver {
     playAux(initialState, Nil)
   }
 
-  def findPath(state: GameState, dst: CellUnit): Option[List[Command]] = {
+  def findPath(state: GameState, dst: UnitPos): Option[List[Command]] = {
     None
   }
 
-  def possibleTargets(state: GameState): Stream[CellUnit] = {
-    Stream.empty[CellUnit]
+  def possibleTargets(state: GameState): Stream[UnitPos] = {
+    state.currentUnitPos match {
+      case None => Stream.empty
+      case Some(cUnit) =>
+        for {
+          col <- (0 until state.grid.width).toStream
+          row <- (0 until state.grid.height).toStream
+
+          newCUnit = cUnit.copy(pos = Cell(col, row))
+
+          piece <- Stream.iterate(Option(newCUnit)) {
+            case None => None
+            case Some(e) => GridOperations.transform(e, Command('d'), state.grid)
+          }.take(6)
+
+          p <- piece
+
+          if GridOperations.fits(p, state.grid)
+        } yield p
+    }
   }
 }
