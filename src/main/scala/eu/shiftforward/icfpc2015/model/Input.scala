@@ -98,7 +98,8 @@ case class Input(id: Int,
                  sourceLength: Int,
                  sourceSeeds: List[Int]) {
 
-  def orderedUnits(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length))
+  def orderedUnitsByGame(idx: Int) = orderedUnitsBySeed(sourceSeeds(idx))
+  def orderedUnitsBySeed(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length))
 }
 
 object Input {
