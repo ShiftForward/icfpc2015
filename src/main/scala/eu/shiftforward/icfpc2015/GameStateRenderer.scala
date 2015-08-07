@@ -15,12 +15,12 @@ object GameStateRenderer {
   case object UnitCell extends CellType { val icon = "⟨-⟩" }
   case object UnknownCell extends CellType { val icon = "⟨?⟩" }
 
-  def asString(grid: Grid, unit: Option[CellUnit] = None) = {
+  def asString(grid: Grid, unit: Option[UnitPos] = None) = {
 
     def cellTypeOf(col: Int, row: Int): CellType = {
       val isFilled = grid.isFilled(col, row)
-      val isPivot = unit.isDefined && unit.get.pivot.col == col && unit.get.pivot.row == row
-      val isUnit = unit.isDefined && unit.get.members.contains(Cell(col, row))
+      val isPivot = unit.isDefined && unit.get.pos.col == col && unit.get.pos.row == row
+      val isUnit = unit.isDefined && unit.get.cells.contains(Cell(col, row))
       (isPivot, isFilled, isUnit) match {
         case (false, false, false) => EmptyCell
         case (true, false, false) => EmptyPivotCell
@@ -45,5 +45,5 @@ object GameStateRenderer {
 }
 
 object GameStateRendererTest extends App {
-  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3)), Some(CellUnit(List(Cell(0, 0)), Cell(0, 1)))))
+  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3)), Some(UnitPos(CellUnit(List(Cell(0, 0)), Cell(0, 1)), Cell(9, 1)))))
 }

@@ -46,7 +46,7 @@ case class Cell(x: Int, y: Int) {
   def col = x
   def row = y
 
-  private[model] def cube = {
+  def cube = {
     val x = col - (row - (row & 1)) / 2
     val z = row
     val y = -x - z
