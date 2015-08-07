@@ -52,6 +52,8 @@ object Grid {
 case class Cube(x: Int, y: Int, z: Int) {
   def rotateCW = Cube(-z, -x, -y)
   def rotateCCW = Cube(-y, -z, -x)
+  def distance(that: Cube) =
+    (math.abs(this.x - that.x) + math.abs(this.y - that.y) + math.abs(this.z - that.z)) / 2
 }
 
 case class Cell(x: Int, y: Int) {
@@ -87,6 +89,9 @@ case class Cell(x: Int, y: Int) {
     Cell(
       Cube(centered.x + pivotCube.x, centered.y + pivotCube.y, centered.z + pivotCube.z))
   }
+
+  def distance(that: Cell) =
+    this.cube.distance(that.cube)
 }
 
 object Cell {
