@@ -10,23 +10,29 @@ object Interactive extends App with GridOperations {
   val units = input.orderedUnitsBySeed(input.sourceSeeds.head)
 
   def loop(grid: Grid, currentUnitPos: Option[UnitPos]): Unit = {
+    val state = GameStateRenderer.asString(grid, currentUnitPos)
+    println(state)
     currentUnitPos match {
       case Some(pos) =>
-        val state = GameStateRenderer.asString(grid, currentUnitPos)
-        println(state)
         readLine("> ") match {
           case ":q" =>
           case ch => {
             val command = Command(ch(0))
-            loop(grid, transform(pos, command, grid))
+            transform(pos, command, grid) match {
+              case None => {
+                val nextGrid = lockCell(pos, grid)
+                loop(nextGrid, initialPosition(units.next, nextGrid))
+              }
+              case nextPos => loop(grid, nextPos)
+            }
           }
         }
 
       case None =>
-        loop(grid, initialPosition(units.next, grid))
+        println("GAME OVER!")
     }
   }
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
-  loop(grid, None)
+  loop(grid, initialPosition(units.next, grid))
 }

@@ -11,9 +11,8 @@ trait GridOperations {
     else None
   }
 
-  def lockCell(unitPos: UnitPos, grid: Grid): Grid = {
-    grid
-  }
+  def lockCell(unitPos: UnitPos, grid: Grid): Grid =
+    grid.filled(unitPos.cells: _*)
 
   def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {
     val (topLeft, bottomRight) = unitPos.boundingBox
