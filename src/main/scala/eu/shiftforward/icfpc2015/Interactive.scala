@@ -13,7 +13,7 @@ object Interactive extends App {
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
   def loop(state: GameState): Unit = {
-    println(GameStateRenderer.asString(state))
+    println(GameStateRenderer.stateAsString(state))
 
     if (state.gameOver) println("GAME OVER")
     else readLine("> ") match {

@@ -15,12 +15,12 @@ object GameStateRenderer {
   case object UnitCell extends CellType { val icon = "⟨-⟩" }
   case object UnknownCell extends CellType { val icon = "⟨?⟩" }
 
-  def asString(state: GameState) = {
+  def asString(grid: Grid, unit: Option[UnitPos] = None) = {
 
     def cellTypeOf(col: Int, row: Int): CellType = {
-      val isFilled = state.grid.isFilled(col, row)
-      val isPivot = state.currentUnitPos.isDefined && state.currentUnitPos.get.pos.col == col && state.currentUnitPos.get.pos.row == row
-      val isUnit = state.currentUnitPos.isDefined && state.currentUnitPos.get.cells.contains(Cell(col, row))
+      val isFilled = grid.isFilled(col, row)
+      val isPivot = unit.isDefined && unit.get.pos.col == col && unit.get.pos.row == row
+      val isUnit = unit.exists(_.cells.contains(Cell(col, row)))
       (isPivot, isFilled, isUnit) match {
         case (false, false, false) => EmptyCell
         case (true, false, false) => EmptyPivotCell
@@ -38,14 +38,18 @@ object GameStateRenderer {
     def renderCell(col: Int, row: Int) = cellTypeOf(col, row).icon
     def rowString(row: Int) =
       (if (row % 2 == 1) f"$row%02d:   " else f"$row%02d: ") +
-        (0 until state.grid.width).map { col => renderCell(col, row) }.mkString(" ")
+        (0 until grid.width).map { col => renderCell(col, row) }.mkString(" ")
 
+    val header = "    " + (0 until grid.width).map { x => f"$x%02d" }.mkString("  ") + "\n"
+
+    header + (0 until grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
+  }
+
+  def stateAsString(state: GameState) = {
     val statsHeader =
       s"Stats\tH ${state.grid.aggHeight} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness}\n" +
         s"Current Score: ${state.score.currentScore}"
 
-    val header = "    " + (0 until state.grid.width).map { x => f"$x%02d" }.mkString("  ") + "\n"
-
-    statsHeader + "\n" + header + (0 until state.grid.height).map(rowString).mkString("\n") + "\n" + "  " + header
+    statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos))
   }
 }
