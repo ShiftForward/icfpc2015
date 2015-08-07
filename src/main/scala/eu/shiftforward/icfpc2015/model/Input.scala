@@ -19,10 +19,10 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     (cell.x + dir.x, cell.y + dir.y)
   }
 
-  def isFilled(col: Int, row: Int): Boolean = grid(col)(row)
+  def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
   def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
-    gridState.updated(cell.col, gridState(cell.col).updated(cell.row, value))
+    gridState.updated(cell.row, gridState(cell.row).updated(cell.col, value))
 
   def filled(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
     updatedInnerGrid(oldGrid, cell, value = true)
@@ -34,7 +34,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
 }
 
 object Grid {
-  def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](width, height))
+  def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](height, width))
 }
 
 case class Cube(x: Int, y: Int, z: Int) {
