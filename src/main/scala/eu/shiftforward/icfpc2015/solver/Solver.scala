@@ -18,27 +18,33 @@ object NaivePowerPhrasesSolver extends Solver {
   // right now this is only for documentation
   val knownWords = List(
     "Ei!", // from statement
-    "Ia! Ia!", // from problem 3 grid
+    "Ia! Ia! ", // from problem 3 grid
     "R'lyeh", // from problem 5 grid
     "Yuggoth") // from problem 7 grid
 
   def play(initialState: GameState) = {
-    val commandsIter = Iterator.continually(knownWords.mkString.toIterator).flatten
+    val wordsIter = Iterator.continually(knownWords).flatten.map(_.toList)
 
-    def fillUntilGameOver(state: GameState, prevState: GameState = null, history: List[Char] = Nil): List[Char] =
+    def fillUntilGameOver(state: GameState,
+                          nextCommands: List[Char],
+                          prevState: GameState = null,
+                          history: List[Char] = Nil): List[Char] = {
+
       state.status match {
         case GameState.GameOver => history.reverse
 
         case GameState.Failed =>
           // revert to the previous state and try with the next command
-          fillUntilGameOver(prevState, null, history.tail)
+          fillUntilGameOver(prevState, wordsIter.next(), null, history.tail)
 
-        case GameState.Running =>
-          val next = commandsIter.next()
-          fillUntilGameOver(state.nextState(next), state, next :: history)
+        case GameState.Running => nextCommands match {
+          case Nil => fillUntilGameOver(state, wordsIter.next(), prevState, history)
+          case next :: tail => fillUntilGameOver(state.nextState(next), tail, state, next :: history)
+        }
       }
+    }
 
-    fillUntilGameOver(initialState).map(Command.char)
+    fillUntilGameOver(initialState, wordsIter.next()).map(Command.char)
   }
 }
 
