@@ -16,6 +16,7 @@ trait GridOperations {
   }
 
   def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {
+    // TODO: This might be wrong
     val (topLeft, bottomRight) = unitPos.boundingBox
     val unitWidth = bottomRight.col - topLeft.col + 1
     val leftShift = Math.floor((grid.width - unitWidth) / 2).toInt
