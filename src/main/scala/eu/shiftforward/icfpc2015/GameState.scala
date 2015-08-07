@@ -15,7 +15,7 @@ case class GameState(
     if (!units.hasNext)
       GameState(nextGrid, units, None, gameOver = true, nextScore)
     else {
-      initialPosition(units.next(), grid) match {
+      initialPosition(units.next(), nextGrid) match {
         case None =>
           GameState(nextGrid, units, None, gameOver = true, nextScore)
         case nextPos =>
