@@ -4,7 +4,7 @@ import java.io.File
 
 import eu.shiftforward.icfpc2015.model._
 import eu.shiftforward.icfpc2015.model.Input._
-import eu.shiftforward.icfpc2015.solver.{Solver, NaivePowerPhrasesSolver}
+import eu.shiftforward.icfpc2015.solver.{ Solver, NaivePowerPhrasesSolver }
 import spray.json._
 import scala.io.Source
 
@@ -23,7 +23,7 @@ object Submit extends App {
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
       val solution = solver.play(GameState(grid, units)).toList
 
-      if(cliVerbose) {
+      if (cliVerbose) {
         println(s"Solution for $problemFile (seed $seed): ${solution.map(_.ch).mkString}")
       }
       Output(input.id, seed, solutionTag, solver.play(GameState(grid, units)).toList)
