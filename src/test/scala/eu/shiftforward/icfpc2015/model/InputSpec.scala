@@ -14,7 +14,7 @@ class InputSpec extends Specification {
     "have a JSON protocol that works on all problems" in {
       forall(new File("problems").listFiles) { problemFile =>
         val json = Source.fromFile(problemFile).mkString.parseJson
-        json mustEqual json.convertTo[Input].toJson
+        json.convertTo[Input] mustEqual json.convertTo[Input].toJson.convertTo[Input]
       }
     }
   }

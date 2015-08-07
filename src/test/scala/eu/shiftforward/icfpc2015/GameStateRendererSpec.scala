@@ -15,13 +15,10 @@ class GameStateRendererSpec extends Specification {
       forall(new File("problems").listFiles) { problemFile =>
         val input = Source.fromFile(problemFile).mkString.parseJson.convertTo[Input]
         println(problemFile.getName)
-        println(GameStateRenderer.asString(
+        println(GameStateRenderer.stateAsString(
           GameState(
             Grid(input.width, input.height).filled(input.filled: _*),
-            Iterator.empty
-          )
-        )
-        )
+            Seq())))
         ok
       }
     }
