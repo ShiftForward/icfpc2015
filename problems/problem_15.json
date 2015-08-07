@@ -1,1 +1,36 @@
-{"height":20,"width":15,"sourceSeeds":[0],"units":[{"members":[{"x":0,"y":0},{"x":2,"y":0},{"x":0,"y":2},{"x":2,"y":2}],"pivot":{"x":1,"y":1}}],"id":15,"filled":[],"sourceLength":100}
+{
+    "filled": [],
+    "height": 20,
+    "id": 15,
+    "sourceLength": 100,
+    "sourceSeeds": [
+        0
+    ],
+    "units": [
+        {
+            "members": [
+                {
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "x": 2,
+                    "y": 0
+                },
+                {
+                    "x": 0,
+                    "y": 2
+                },
+                {
+                    "x": 2,
+                    "y": 2
+                }
+            ],
+            "pivot": {
+                "x": 1,
+                "y": 1
+            }
+        }
+    ],
+    "width": 15
+}
