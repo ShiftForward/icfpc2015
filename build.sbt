@@ -11,6 +11,7 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
   "com.github.nscala-time"     %% "nscala-time"     % "2.0.0",
   "com.typesafe"                % "config"          % "1.3.0",
+  "io.spray"                   %% "spray-json"      % "1.3.2",
   "org.specs2"                 %% "specs2-core"     % "3.6.4"  % "test")
 
 scalariformSettings
