@@ -36,7 +36,5 @@ object PowerPhrase {
     }
     matched
   }
-
-  def _print
 }
 
