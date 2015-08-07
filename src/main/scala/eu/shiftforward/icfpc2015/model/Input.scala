@@ -4,7 +4,6 @@ import eu.shiftforward.icfpc2015.Utils
 import spray.json.DefaultJsonProtocol._
 
 case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
-
   val directions = Array(
     Array(
       Cell(1, 0), Cell(0, -1), Cell(-1, -1),
@@ -18,6 +17,15 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     val dir = directions(parity)(direction)
     (cell.x + dir.x, cell.y + dir.y)
   }
+
+  def aggHeight: Int = (0 to width).maxBy(c => column(c).indexWhere(identity))
+  def completeLines: Int = (0 to height).count { r => row(r).forall(identity) }
+
+  def holes: Int = ???
+  def bumpines: Int = ???
+
+  def column(c: Int): Array[Boolean] = grid(c)
+  def row(r: Int): Array[Boolean] = grid.map(_(r))
 
   def isFilled(col: Int, row: Int): Boolean = grid(col)(row)
 
