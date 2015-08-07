@@ -7,6 +7,11 @@ object Utils {
     points + lineBonus
   }
 
+  def powerScore(len: Int, reps: Int) = {
+    val powerBonus = if (reps > 0) 300 else 0
+    2 * len * reps + powerBonus
+  }
+
   def random(rseed: Long) = List(0).toIterator ++ new Iterator[Long] {
     var seed = rseed
     override def hasNext: Boolean = true
