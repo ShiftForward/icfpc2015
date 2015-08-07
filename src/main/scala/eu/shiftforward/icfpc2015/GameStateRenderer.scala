@@ -7,12 +7,12 @@ object GameStateRenderer {
     def icon: String
   }
 
-  case object EmptyCell extends CellType { val icon = " \u2B21 " }
-  case object FilledCell extends CellType { val icon = " \u2B22 " }
-  case object EmptyPivotCell extends CellType { val icon = "'\u2B21'" }
-  case object FilledPivotCell extends CellType { val icon = "'\u2B22'" }
-  case object UnitPivotCell extends CellType { val icon = "'\u2B24'" }
-  case object UnitCell extends CellType { val icon = " \u2B24 " }
+  case object EmptyCell extends CellType { val icon = "⟨ ⟩" }
+  case object FilledCell extends CellType { val icon = "⟨X⟩" }
+  case object EmptyPivotCell extends CellType { val icon = "⟨.⟩" }
+  case object FilledPivotCell extends CellType { val icon = "⟨/⟩" }
+  case object UnitPivotCell extends CellType { val icon = "⟨=⟩" }
+  case object UnitCell extends CellType { val icon = "⟨-⟩" }
   case object UnknownCell extends CellType { val icon = "⟨?⟩" }
 
   def asString(grid: Grid, unit: Option[UnitPos] = None) = {
