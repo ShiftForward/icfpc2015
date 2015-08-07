@@ -17,9 +17,10 @@ trait GridOperations {
   def lockCell(unitPos: UnitPos, grid: Grid): Grid =
     grid.filled(unitPos.cells.toList: _*)
 
-  def removeLines(grid: Grid): Grid = {
+  def removeLines(grid: Grid): (Grid, Int) = {
     val removedGrid = grid.grid.filterNot(_.forall(identity))
-    grid.copy(grid = Array.ofDim[Boolean](grid.height - removedGrid.size, grid.width) ++ removedGrid)
+    val removedLines = grid.height - removedGrid.size
+    (grid.copy(grid = Array.ofDim[Boolean](removedLines, grid.width) ++ removedGrid), removedLines)
   }
 
   def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {

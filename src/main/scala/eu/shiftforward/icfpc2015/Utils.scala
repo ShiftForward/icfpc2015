@@ -3,12 +3,6 @@ package eu.shiftforward.icfpc2015
 import eu.shiftforward.icfpc2015.model.Command
 
 object Utils {
-  def computeScore(sizeOfCurrentUnit: Int, linesClearedByCurrentUnit: Int, linesClearedByLastUnit: Int) = {
-    val points = sizeOfCurrentUnit + 100 * (1 + linesClearedByCurrentUnit) * linesClearedByCurrentUnit / 2
-    val lineBonus = if (linesClearedByLastUnit > 1) (linesClearedByLastUnit - 1) * points / 10 else 0
-    points + lineBonus
-  }
-
   def powerScore(len: Int, reps: Int) = {
     val powerBonus = if (reps > 0) 300 else 0
     2 * len * reps + powerBonus
