@@ -6,10 +6,10 @@ class PowerPhrase(text: List[Char]) {
 }
 
 object PowerPhrase {
-  def getMatching(source: List[Command], powerphrases: List[PowerPhrase]) = {
+  def getMatching(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
     var matching = List[(Int, PowerPhrase)]()
-    var matched = List[(Int, PowerPhrase)]()
+    var matched = Map[PowerPhrase, List[Int]]()
 
     for (i <- source.indices) {
       val command = source(i)
@@ -23,7 +23,9 @@ object PowerPhrase {
 
           if (command == power.movements(idx)) {
             if (idx + 1 == power.movements.length) {
-              matched = matched :+ (i - power.movements.length + 1, power)
+              val startingIdx = i - power.movements.length + 1
+
+              matched = matched.updated(power, matched.getOrElse(power, List[Int]()) :+ startingIdx)
               acc
             } else {
               acc :+ (idx + 1, power)
