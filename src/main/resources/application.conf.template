@@ -1,0 +1,4 @@
+auth {
+  api-token: "YOUR_API_TOKEN_HERE"
+  team-id: YOUR_TEAM_ID_HERE
+}

@@ -38,6 +38,8 @@ case object RotateCCW extends RotateCommand {
 
 object Command {
 
+  def string(str: String) = str.map(char).toList
+
   def char(ch: Char) = CharCommand(ch)
 
   def move(dir: String) = dir match {
