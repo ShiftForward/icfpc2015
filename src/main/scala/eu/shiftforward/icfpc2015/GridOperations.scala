@@ -1,6 +1,6 @@
 package eu.shiftforward.icfpc2015
 
-import eu.shiftforward.icfpc2015.model.{ Grid, MoveCommand }
+import eu.shiftforward.icfpc2015.model.{Cell, CellUnit, Grid, MoveCommand}
 
 trait GridOperations {
 
@@ -10,5 +10,17 @@ trait GridOperations {
 
   def lockCell(unit: UnitPos, board: Grid): Grid = {
     board
+  }
+
+  def initialPosition(unit: CellUnit, board: Grid): Option[UnitPos] = {
+    Some(UnitPos(unit, Cell(0,0)))
+  }
+
+  def cellIntercepts(unit: UnitPos, board: Grid): Boolean = {
+    false
+  }
+
+  def moveUnitPos(unit: UnitPos, action: MoveCommand): UnitPos = {
+    unit
   }
 }
