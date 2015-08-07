@@ -2,7 +2,7 @@ package eu.shiftforward.icfpc2015
 
 import java.io.File
 import spray.json._
-import eu.shiftforward.icfpc2015.model.{ Grid, Input }
+import eu.shiftforward.icfpc2015.model.{ CellUnit, Grid, Input }
 import org.specs2.mutable.Specification
 
 import scala.io.Source
@@ -15,7 +15,13 @@ class GameStateRendererSpec extends Specification {
       forall(new File("problems").listFiles) { problemFile =>
         val input = Source.fromFile(problemFile).mkString.parseJson.convertTo[Input]
         println(problemFile.getName)
-        println(GameStateRenderer.asString(Grid(input.width, input.height).filled(input.filled: _*)))
+        println(GameStateRenderer.asString(
+          GameState(
+            Grid(input.width, input.height).filled(input.filled: _*),
+            Iterator.empty
+          )
+        )
+        )
         ok
       }
     }
