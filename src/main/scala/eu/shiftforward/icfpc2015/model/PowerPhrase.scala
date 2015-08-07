@@ -6,7 +6,7 @@ class PowerPhrase(text: List[Char]) {
 }
 
 object PowerPhrase {
-  def _match(source: List[Command], powerphrases: List[PowerPhrase]) = {
+  def getMatching(source: List[Command], powerphrases: List[PowerPhrase]) = {
 
     var matching = List[(Int, PowerPhrase)]()
     var matched = List[(Int, PowerPhrase)]()
@@ -19,7 +19,7 @@ object PowerPhrase {
       }
 
       matching = matching.foldLeft(List[(Int, PowerPhrase)]()) {
-        case (acc, m @ (idx, power)) =>
+        case (acc, (idx, power)) =>
 
           if (command == power.movements(idx)) {
             if (idx + 1 == power.movements.length) {
@@ -32,7 +32,6 @@ object PowerPhrase {
             acc
           }
       }
-
     }
     matched
   }
