@@ -8,7 +8,7 @@ import GridOperations._
 object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
 
-  val units: Iterator[CellUnit] = input.orderedUnitsBySeed(input.sourceSeeds.head)
+  val units = input.orderedUnitsBySeed(input.sourceSeeds.head)
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 

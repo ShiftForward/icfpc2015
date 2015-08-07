@@ -5,22 +5,23 @@ import GridOperations._
 
 case class GameState(
     grid: Grid,
-    units: Iterator[CellUnit],
+    units: Seq[CellUnit],
     currentUnitPos: Option[UnitPos],
     gameOver: Boolean,
     score: Score = Score(),
     prevStates: Set[UnitPos] = Set()) {
 
   def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
-    if (!units.hasNext)
-      GameState(nextGrid, units, None, gameOver = true, nextScore)
-    else {
-      initialPosition(units.next(), nextGrid) match {
-        case None =>
-          GameState(nextGrid, units, None, gameOver = true, nextScore)
-        case nextPos =>
-          GameState(nextGrid, units, nextPos, gameOver = false, nextScore, prevStates = Set(nextPos.get))
-      }
+    units match {
+      case h :: t =>
+        initialPosition(h, nextGrid) match {
+          case None =>
+            GameState(nextGrid, t, None, gameOver = true, nextScore)
+          case nextPos =>
+            GameState(nextGrid, t, nextPos, gameOver = false, nextScore, prevStates = Set(nextPos.get))
+        }
+      case _ =>
+        GameState(nextGrid, units, None, gameOver = true, nextScore)
     }
   }
 
@@ -55,7 +56,7 @@ case class GameState(
 }
 
 object GameState {
-  def apply(grid: Grid, units: Iterator[CellUnit]): GameState = {
+  def apply(grid: Grid, units: Seq[CellUnit]): GameState = {
     GameState(grid, units, None, gameOver = false).start()
   }
 }
