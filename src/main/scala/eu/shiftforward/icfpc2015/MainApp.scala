@@ -6,6 +6,7 @@ object MainApp extends App {
     files: List[String] = List(),
     timeLimit: Option[Int] = None,
     memoryLimit: Option[Int] = None,
+    coreNumber: Option[Int] = None,
     phrasesOfPower: List[String] = List())
 
   def nextOption(opts: Options, remArgs: List[String]): Options = {
@@ -17,6 +18,8 @@ object MainApp extends App {
         nextOption(opts.copy(timeLimit = Some(value.toInt)), tail)
       case "-m" :: value :: tail =>
         nextOption(opts.copy(memoryLimit = Some(value.toInt)), tail)
+      case "-c" :: value :: tail =>
+        nextOption(opts.copy(coreNumber = Some(value.toInt)), tail)
       case "-p" :: value :: tail =>
         nextOption(opts.copy(phrasesOfPower = opts.phrasesOfPower :+ value), tail)
       case _ => nextOption(opts, remArgs.tail)
