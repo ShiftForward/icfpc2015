@@ -28,7 +28,10 @@ object GameStateRenderer {
         case (true, false, true) => UnitPivotCell
         case (false, true, false) => FilledCell
         case (false, false, true) => UnitCell
-        case _ => UnknownCell
+        case _ => {
+          println(s"Got an unknown cell! isPivot: $isPivot; isFilled: $isFilled; isUnit: $isUnit")
+          UnknownCell
+        }
       }
     }
 
