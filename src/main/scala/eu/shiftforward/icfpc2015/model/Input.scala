@@ -3,9 +3,9 @@ package eu.shiftforward.icfpc2015.model
 import spray.json.DefaultJsonProtocol._
 
 class Grid(width: Int, height: Int) {
-  private[this] val grid = Array.ofDim[Boolean](width, height)
+  val grid = Array.ofDim[Boolean](width, height)
 
-  private[this] val directions = Array(
+  val directions = Array(
     Array(
       Cell(1, 0), Cell(0, -1), Cell(-1, -1),
       Cell(-1, 0), Cell(-1, 1), Cell(0, 1)),
