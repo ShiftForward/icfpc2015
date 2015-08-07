@@ -3,14 +3,39 @@ package eu.shiftforward.icfpc2015
 import eu.shiftforward.icfpc2015.model._
 
 object GameStateRenderer {
-  def asString(grid: Grid) = {
-    def renderCell(filled: Boolean) = filled match {
-      case true => "⟨X⟩"
-      case false => "⟨ ⟩"
+  sealed trait CellType {
+    def icon: String
+  }
+
+  case object EmptyCell extends CellType { val icon = "⟨ ⟩" }
+  case object FilledCell extends CellType { val icon = "⟨X⟩" }
+  case object EmptyPivotCell extends CellType { val icon = "⟨.⟩" }
+  case object FilledPivotCell extends CellType { val icon = "⟨/⟩" }
+  case object UnitPivotCell extends CellType { val icon = "⟨=⟩" }
+  case object UnitCell extends CellType { val icon = "⟨-⟩" }
+  case object UnknownCell extends CellType { val icon = "⟨?⟩" }
+
+  def asString(grid: Grid, unit: Option[CellUnit] = None) = {
+
+    def cellTypeOf(col: Int, row: Int): CellType = {
+      val isFilled = grid.isFilled(col, row)
+      val isPivot = unit.isDefined && unit.get.pivot.col == col && unit.get.pivot.row == row
+      val isUnit = unit.isDefined && unit.get.members.contains(Cell(col, row))
+      (isPivot, isFilled, isUnit) match {
+        case (false, false, false) => EmptyCell
+        case (true, false, false) => EmptyPivotCell
+        case (true, true, false) => FilledPivotCell
+        case (true, false, true) => UnitPivotCell
+        case (false, true, false) => FilledCell
+        case (false, false, true) => UnitCell
+        case _ => UnknownCell
+      }
     }
+
+    def renderCell(col: Int, row: Int) = cellTypeOf(col, row).icon
     def rowString(row: Int) =
       (if (row % 2 == 1) f"$row%02d:   " else f"$row%02d: ") +
-        (0 until grid.width).map { col => renderCell(grid.isFilled(col, row)) }.mkString(" ")
+        (0 until grid.width).map { col => renderCell(col, row) }.mkString(" ")
 
     val header = "    " + (0 until grid.width).map { x => f"$x%02d" }.mkString("  ") + "\n"
 
@@ -19,5 +44,5 @@ object GameStateRenderer {
 }
 
 object GameStateRendererTest extends App {
-  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3))))
+  println(GameStateRenderer.asString(Grid(10, 15).filled(Cell(2, 2), Cell(2, 3)), Some(CellUnit(List(Cell(0, 0)), Cell(0, 1)))))
 }
