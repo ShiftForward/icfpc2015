@@ -1,5 +1,7 @@
 package eu.shiftforward.icfpc2015
 
+import eu.shiftforward.icfpc2015.model.Command
+
 object Utils {
   def computeScore(sizeOfCurrentUnit: Int, linesClearedByCurrentUnit: Int, linesClearedByLastUnit: Int) = {
     val points = sizeOfCurrentUnit + 100 * (1 + linesClearedByCurrentUnit) * linesClearedByCurrentUnit / 2
