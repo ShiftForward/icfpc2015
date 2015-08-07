@@ -26,7 +26,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   lazy val fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
   lazy val holes: Int = (0 until width).map { c => column(c).dropWhile(p => !p).count(p => !p) }.sum
   lazy val bumpiness: Int = {
-    val heights = (0 until width).map(c => column(c).indexWhere(identity))
+    val heights = (0 until width).map { c => val h = column(c).indexWhere(identity); if (h < 0) height else h }
     heights.zip(heights.drop(1)).map { case (s, d) => math.abs(d - s) }.sum
   }
 
