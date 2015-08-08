@@ -55,24 +55,28 @@ object SmartSolver extends Solver {
   def reward(grid: Grid): Double = -grid.aggHeight // TODO update this
 
   def play(initialState: GameState): Seq[Command] = {
-    def playAux(state: GameState, commands: Seq[Command]): Seq[Command] =
+    def playAux(state: GameState, commands: Seq[Command], addLock: Boolean = false): Seq[Command] =
       if (state.gameOver) {
         println("GAME OVER")
         println(GameStateRenderer.asString(state.grid))
         commands
       } else {
-        possibleTargets(state).sortBy { newUnitPos =>
-          val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-          reward(newGrid)
-        }.reverse
-          .flatMap(t => findPath(state, t)).headOption match {
-            // FIXME Add command to lock piece (Remove Command('a'))
-            case Some(p) => playAux(state.nextState(p :+ Command('a')), commands ++ p :+ Command('a'))
-            case None =>
-              println("NO PATHS FOUND")
-              println(GameStateRenderer.asString(state.grid))
-              commands
-          }
+        lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
+        if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get), commands ++ lockCommand.toList)
+        else {
+          possibleTargets(state).sortBy { newUnitPos =>
+            val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
+            reward(newGrid)
+          }.reverse
+            .flatMap(t => findPath(state, t)).headOption match {
+              case Some(p) =>
+                playAux(state.nextState(p), commands ++ p, addLock = true)
+              case None =>
+                println("NO PATHS FOUND")
+                println(GameStateRenderer.asString(state.grid))
+                commands
+            }
+        }
       }
 
     playAux(initialState, Nil)
@@ -86,6 +90,18 @@ object SmartSolver extends Solver {
       Command('l'),
       Command('d'),
       Command('k'))
+
+  def getLockCommand(grid: Grid, unitPos: Option[UnitPos]) = unitPos.flatMap { pos =>
+    commandsToTest
+      .toStream
+      .flatMap { comm =>
+        GridOperations.transform(pos, comm, grid) match {
+          case None => Some(comm)
+          case Some(_) => None
+        }
+      }.headOption
+
+  }
 
   def findPath(state: GameState, dst: UnitPos): Option[List[Command]] = {
     state.currentUnitPos match {
