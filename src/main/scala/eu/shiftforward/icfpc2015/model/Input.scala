@@ -3,6 +3,8 @@ package eu.shiftforward.icfpc2015.model
 import eu.shiftforward.icfpc2015.Utils
 import spray.json.DefaultJsonProtocol._
 
+import scala.collection.mutable
+
 case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   val directions = Array(
     Array(
@@ -18,22 +20,40 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     (cell.x + dir.x, cell.y + dir.y)
   }
 
-  lazy val heights: Seq[Int] = (0 until width).map { c =>
+  def colHeight(c: Int) = {
     val h = column(c).indexWhere(identity)
     if (h < 0) 0 else height - h
   }
 
-  lazy val (aggHeight, bumpiness, aggLow) = {
-    val loopResults = heights.tail.foldLeft((heights.head, 0, heights.head, 0)) {
-      case ((maxHeight, bump, oldHeight, oldAggLow), newHeight) =>
-        (math.max(newHeight, maxHeight), bump + math.abs(newHeight - oldHeight), newHeight, math.min(newHeight, oldAggLow))
+  def colHoles(c: Int) = {
+    column(c).dropWhile(p => !p).count(p => !p)
+  }
+
+  lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
+    val firstHeight = colHeight(0)
+    val firstHoles = colHoles(0)
+    val firstFilledLines = column(0).zipWithIndex.filter(_._1).map(_._2)
+    var col = 1
+    var maxHeight = firstHeight
+    var minHeight = firstHeight
+    var bumpAcc = 0
+    var holesAcc = firstHoles
+    val linesAcc = mutable.HashSet(firstFilledLines: _*)
+    var oldHeight = firstHeight
+    while (col < width) {
+      val newHeight = colHeight(col)
+      maxHeight = math.max(newHeight, maxHeight)
+      minHeight = math.min(newHeight, minHeight)
+      bumpAcc += math.abs(newHeight - oldHeight)
+      holesAcc += colHoles(col)
+      linesAcc.retain { row => grid(row)(col) }
+      oldHeight = newHeight
+      col += 1
     }
-    (loopResults._1, loopResults._2, loopResults._4)
+    (maxHeight, minHeight, bumpAcc, holesAcc, linesAcc.size)
   }
 
   lazy val highLow = aggHeight - aggLow
-  lazy val fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
-  lazy val holes: Int = (0 until width).map { c => column(c).dropWhile(p => !p).count(p => !p) }.sum
 
   def row(r: Int): Array[Boolean] = grid(r)
   def column(c: Int): Array[Boolean] = grid.map(_(c))
