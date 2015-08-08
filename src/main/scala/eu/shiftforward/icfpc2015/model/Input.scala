@@ -69,8 +69,8 @@ object Grid {
 }
 
 final case class Cube(x: Int, y: Int, z: Int) {
-  def rotateCW = Cube(-z, -x, -y)
-  def rotateCCW = Cube(-y, -z, -x)
+  lazy val rotateCW = Cube(-z, -x, -y)
+  lazy val rotateCCW = Cube(-y, -z, -x)
   def distance(that: Cube) =
     (math.abs(this.x - that.x) + math.abs(this.y - that.y) + math.abs(this.z - that.z)) / 2
 }
@@ -79,7 +79,7 @@ final case class Cell(x: Int, y: Int) {
   @inline def col = x
   @inline def row = y
 
-  def cube = {
+  lazy val cube = {
     val x = col - (row - (row & 1)) / 2
     val z = row
     val y = -x - z
@@ -123,11 +123,11 @@ object Cell {
 }
 
 final case class CellUnit(members: Set[Cell], pivot: Cell) {
-  def rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
+  lazy val rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
-  def rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)
+  lazy val rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)
 
-  def boundingBox: (Cell, Cell) = {
+  lazy val boundingBox: (Cell, Cell) = {
     val topLeft = Cell(members.map(_.col).min, members.map(_.row).min)
     val bottomRight = Cell(members.map(_.col).max, members.map(_.row).max)
     (topLeft, bottomRight)
@@ -147,7 +147,7 @@ final case class Input(id: Int,
 }
 
 object Input {
-  implicit val cellJsonFormat = jsonFormat2(Cell.apply)
-  implicit val cellUnitJsonFormat = jsonFormat2(CellUnit)
+  implicit val cellJsonFormat = jsonFormat(Cell.apply, "x", "y")
+  implicit val cellUnitJsonFormat = jsonFormat(CellUnit, "members", "pivot")
   implicit val inputJsonFormat = jsonFormat7(Input.apply)
 }
