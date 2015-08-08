@@ -125,7 +125,7 @@ object GeneticOptimizer extends Optimizer {
 
     val best = petri.evolution(petri.toMatePool(petri.randomPool((1, 1, 1, 1))))._1.maxBy(_._2)
 
-    println(f"DONE\tBest Fit ${best._2}%4f\tSpecimen ${best._1}")
+    println(f"DONE\tBest Fit ${best._2}\tSpecimen ${best._1}")
 
     OptimizationResult(best._2, best._1)
   }
