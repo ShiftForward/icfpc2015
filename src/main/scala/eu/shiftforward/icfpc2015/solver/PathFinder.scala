@@ -38,6 +38,24 @@ trait PathFindingUtils {
 
     loop()
   }
+
+  def buildPath(from: UnitPos, to: UnitPos): List[Command] = {
+    val c = mutable.ListBuffer[Command]()
+    def go(p: UnitPos) {
+      if (p != from) {
+        prev.get(p) match {
+          case Some((pr, comm, _)) =>
+            c += comm
+            go(pr)
+
+          case None => // do nothing
+        }
+      }
+    }
+
+    go(to)
+    c.toList
+  }
 }
 
 class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
@@ -70,25 +88,8 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
       pathFindingLoop(to, from, grid)
 
       prev.get(from) match {
-        case Some(_) =>
-          val c = mutable.ListBuffer[Command]()
-          def go(p: UnitPos) {
-            if (p != to) {
-              prev.get(p) match {
-                case Some((pr, comm, _)) =>
-                  c += comm
-                  go(pr)
-
-                case None => // do nothing
-              }
-            }
-          }
-
-          go(from)
-          Some(c.map(invertedCommands).toList)
-
-        case None =>
-          None
+        case Some(_) => Some(buildPath(to, from).map(invertedCommands))
+        case None => None
       }
     }
   }
@@ -116,25 +117,8 @@ class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
       pathFindingLoop(from, to, grid)
 
       prev.get(to) match {
-        case Some(_) =>
-          val c = mutable.ListBuffer[Command]()
-          def go(p: UnitPos) {
-            if (p != from) {
-              prev.get(p) match {
-                case Some((pr, comm, _)) =>
-                  c += comm
-                  go(pr)
-
-                case None => // do nothing
-              }
-            }
-          }
-
-          go(to)
-          Some(c.toList.reverse)
-
-        case None =>
-          None
+        case Some(_) => Some(buildPath(from, to).reverse)
+        case None => None
       }
     }
   }
