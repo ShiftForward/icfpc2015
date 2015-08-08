@@ -51,6 +51,8 @@ object GridOperations {
     case MoveE => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x + 1))
     case MoveSW => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - (if (unitPos.pos.y % 2 == 0) 1 else 0), y = unitPos.pos.y + 1))
     case MoveSE => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x + (if (unitPos.pos.y % 2 == 0) 0 else 1), y = unitPos.pos.y + 1))
+    case MoveNW => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - (if (unitPos.pos.y % 2 == 0) 1 else 0), y = unitPos.pos.y - 1))
+    case MoveNE => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - (if (unitPos.pos.y % 2 == 0) 0 else 1), y = unitPos.pos.y - 1))
     case RotateCW => unitPos.copy(unit = unitPos.unit.rotateCW)
     case RotateCCW => unitPos.copy(unit = unitPos.unit.rotateCCW)
   }

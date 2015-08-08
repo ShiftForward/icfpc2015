@@ -78,7 +78,9 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
             cost(newGrid)
           }
 
-          candidates.flatMap(t => findPath(state, t)).headOption match {
+          val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
+
+          candidates.flatMap(t => pathFinder.pathTo(t)).headOption match {
             case Some(p) =>
               playAux(state.nextState(p), addLock = true)
             case None =>
@@ -107,61 +109,6 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
 
   def getLockCommand(grid: Grid, unitPos: Option[UnitPos]) = unitPos.flatMap { pos =>
     commandsToTest.find { comm => GridOperations.transform(pos, comm, grid).isEmpty }
-  }
-
-  def findPath(state: GameState, dst: UnitPos): Option[List[Command]] = {
-    state.currentUnitPos match {
-      case Some(startPos) =>
-        implicit val ordering = new Ordering[(Int, UnitPos)] {
-          def compare(p1: (Int, UnitPos), p2: (Int, UnitPos)) = p1._1 compare p2._1
-        }.reverse
-
-        val pq = mutable.PriorityQueue[(Int, UnitPos)]()
-        val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
-        val grid = state.grid
-        pq.enqueue((0, startPos))
-
-        def loop() {
-          if (!pq.isEmpty) {
-            val (_, currentPos) = pq.dequeue
-            val dist = if (currentPos == startPos) 0 else prev(currentPos)._3
-            if (currentPos != dst) {
-              commandsToTest.foreach { command =>
-                transform(currentPos, command, grid).foreach { nextPos =>
-                  if (!prev.contains(nextPos) && nextPos != startPos) {
-                    prev.update(nextPos, (currentPos, command, dist + 1))
-                    pq.enqueue((dist + 1 + nextPos.pos.distance(dst.pos), nextPos))
-                  }
-                }
-              }
-              loop()
-            }
-          }
-        }
-
-        loop()
-
-        prev.get(dst) match {
-          case Some(_) =>
-            val c = mutable.ListBuffer[Command]()
-            def go(p: UnitPos) {
-              prev.get(p) match {
-                case Some((pr, comm, _)) =>
-                  c += comm
-                  go(pr)
-                case None => // do nothing
-              }
-            }
-
-            go(dst)
-            Some(c.toList.reverse)
-
-          case None =>
-            None
-        }
-
-      case None => None
-    }
   }
 
   def possibleTargets(state: GameState): Stream[UnitPos] = {

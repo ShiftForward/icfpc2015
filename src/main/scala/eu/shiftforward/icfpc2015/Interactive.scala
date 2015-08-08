@@ -3,7 +3,7 @@ package eu.shiftforward.icfpc2015
 import eu.shiftforward.icfpc2015.GameState.UnitPosState
 import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
-import eu.shiftforward.icfpc2015.solver.SmartSolver
+import eu.shiftforward.icfpc2015.solver._
 import spray.json._
 
 import scala.io.Source
@@ -50,7 +50,8 @@ object Interactive extends App {
         val pos = Cell(split(1).toInt, split(2).toInt)
         val execute = split.size == 4
         val unit = state.currentUnitPos.get.unit
-        val path = solver.findPath(state, UnitPos(unit, pos))
+        val pathFinder = new PathFinder(state.grid, state.currentUnitPos.get)
+        val path = pathFinder.pathTo(UnitPos(unit, pos))
         path match {
           case Some(l) =>
             val pathStr = l.map(_.ch).mkString

@@ -12,6 +12,10 @@ case object MoveSE extends Action
 case object RotateCW extends Action
 case object RotateCCW extends Action
 
+// These are used for path finding
+case object MoveNW extends Action
+case object MoveNE extends Action
+
 object Command {
 
   def string(str: String) = str.map(char).toList
@@ -24,7 +28,9 @@ object Command {
     MoveSW -> List('a', 'g', 'h', 'i', 'j', '4'),
     MoveSE -> List('l', 'm', 'n', 'o', ' ', '5'),
     RotateCW -> List('d', 'q', 'r', 'v', 'z', '1'),
-    RotateCCW -> List('k', 's', 't', 'u', 'w', 'x')
+    RotateCCW -> List('k', 's', 't', 'u', 'w', 'x'),
+    MoveNW -> List('`'),
+    MoveNE -> List('´')
   )
 
   val invertedMappings = mappings.flatMap {
