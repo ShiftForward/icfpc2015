@@ -60,14 +60,19 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
       d * grid.fullLines
 
   def play(initialState: GameState): Seq[Command] = {
-    def playAux(state: GameState, commands: Seq[Command], addLock: Boolean = false): Seq[Command] =
-      if (state.gameOver) {
+    def playAux(state: GameState, addLock: Boolean = false): Seq[Command] = state.status match {
+
+      case GameState.GameOver =>
         println("GAME OVER")
         println(GameStateRenderer.stateAsString(state))
-        commands
-      } else {
+        state.commandHistory
+
+      case GameState.Failed =>
+        throw new Exception("SmartSolver led to a failure state!")
+
+      case GameState.Running =>
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
-        if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get), commands ++ lockCommand.toList)
+        if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
         else {
           possibleTargets(state).sortBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
@@ -75,16 +80,16 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
           }.reverse
             .flatMap(t => findPath(state, t)).headOption match {
               case Some(p) =>
-                playAux(state.nextState(p), commands ++ p, addLock = true)
+                playAux(state.nextState(p), addLock = true)
               case None =>
                 println("NO PATHS FOUND")
                 println(GameStateRenderer.stateAsString(state))
-                commands
+                state.commandHistory
             }
         }
-      }
+    }
 
-    playAux(initialState, Nil)
+    playAux(initialState)
   }
 
   val commandsToTest =
