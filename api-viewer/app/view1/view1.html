@@ -8,35 +8,39 @@
     padding: 0.5em
   }
 
-  .detail_swatch {
-    float: right;
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    margin: 0 4px 0 0
-  }
-
-  .rickshaw_graph .detail .date {
+  .rickshaw_graph .detail {
     color: #a0a0a0
   }
 </style>
 
-<div layout="column">
-  <md-content class="md-padding">
-    <md-tabs md-selected="selectedIndex" md-border-bottom md-autoselect>
-      <md-tab ng-repeat="solution in solutions"
-              ng-disabled="solution.disabled"
-              label="{{$index}}">
-        <div class="demo-solution solution{{$index%4}}" style="padding: 25px; text-align: center;">
-          <div class="panel-body" style="height: 400px; width: 400px">
-            <rickshaw style="width: 400px; height: 400px"
-                  rickshaw-options="solution.options"
-                  rickshaw-features="solution.features"
-                  rickshaw-series="solution.series">
-            </rickshaw>
-          </div>
-        </div>
-      </md-tab>
-    </md-tabs>
-  </md-content>
+
+<div>
+  <md-grid-list
+      md-cols-sm="1" md-cols-md="1" md-cols-gt-md="12"
+      md-row-height-gt-md="1:1" md-row-height="2:2"
+      md-gutter="12px" md-gutter-gt-sm="60px" >
+    <md-grid-tile ng-repeat="solution in solutions" md-colspan="4" md-rowspan="3">
+      <md-grid-tile-header style="background-color: lightblue; color: black">
+        <h3>Problem {{$index}}</h3>
+      </md-grid-tile-header>
+      <div class="panel-body" style="width: 100%;">
+        <rickshaw style="width: 100%;"
+            rickshaw-options="solution.options"
+            rickshaw-features="solution.features"
+            rickshaw-series="solution.series">
+        </rickshaw>
+      </div>
+    </md-grid-tile>
+  </md-grid-list>
 </div>
+
+<!--<div layout="column">-->
+  <!--<md-content class="md-padding">-->
+    <!--<md-tabs md-selected="selectedIndex" md-border-bottom md-autoselect>-->
+      <!--<md-tab ng-repeat="solution in solutions"-->
+              <!--ng-disabled="solution.disabled"-->
+              <!--label="{{$index}}">-->
+      <!--</md-tab>-->
+    <!--</md-tabs>-->
+  <!--</md-content>-->
+<!--</div>-->

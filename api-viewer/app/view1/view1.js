@@ -23,7 +23,7 @@ angular.module('myApp.view1', ['ngRoute'])
             var data = _
                 .chain(results)
                 .map(function(result) {
-                  return { y: result.score, x: new Date(result.createdAt).getTime() / 1000, problemId: result.problemId };
+                  return { y: (result.score || 0), x: new Date(result.createdAt).getTime() / 1000, problemId: result.problemId };
                 })
                 .sortBy(function(r) {return r.x;})
                 .value();
@@ -56,7 +56,7 @@ angular.module('myApp.view1', ['ngRoute'])
               data: data
             }];
 
-            console.log(solution.series)
+            //console.log(solution)
 
             return solution;
           })
@@ -64,14 +64,8 @@ angular.module('myApp.view1', ['ngRoute'])
 
       console.log(x);
       $scope.solutions = x;
-      $scope.selectedIndex = 0;
-    });
-
-    $scope.$watch('selectedIndex', function(current, old) {
-      $scope.$broadcast('rickshaw::resize');
-    });
-
-    $scope.solutions.forEach(function (solution) {
-      console.log(solution)
+      setInterval(function() { $scope.$broadcast('rickshaw::resize') }, 100);
+      setInterval(function() { $scope.$broadcast('rickshaw::resize') }, 500);
+      setInterval(function() { $scope.$broadcast('rickshaw::resize') }, 999);
     });
 }]);
