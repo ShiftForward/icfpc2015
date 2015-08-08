@@ -67,7 +67,7 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
         state.commandHistory
 
       case GameState.Failed =>
-        throw new Exception("SmartSolver led to a failure state!\nCommand History:" + state.commandHistory)
+        throw new Exception("SmartSolver led to a failure state!\nCommand History:" + state.commandHistory.map(_.ch).mkString)
 
       case GameState.Running =>
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
@@ -86,7 +86,7 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
             case None =>
               if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
               else {
-                println("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory)
+                println("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory.map(_.ch).mkString)
                 state.commandHistory
               }
           }
