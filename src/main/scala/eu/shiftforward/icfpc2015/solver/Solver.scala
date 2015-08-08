@@ -88,11 +88,7 @@ object SmartSolver extends Solver {
         def loop() {
           if (!pq.isEmpty) {
             val (_, currentPos) = pq.dequeue
-            val dist =
-              if (currentPos == startPos)
-                0
-              else
-                prev(currentPos)._3
+            val dist = if (currentPos == startPos) 0 else prev(currentPos)._3
             if (currentPos != dst) {
               commandsToTest.foreach { command =>
                 transform(currentPos, command, grid).foreach { nextPos =>
