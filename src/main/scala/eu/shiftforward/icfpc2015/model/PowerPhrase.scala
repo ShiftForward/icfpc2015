@@ -40,24 +40,8 @@ object PowerPhrase {
   }
 
   def flatten(sourceLength: Int, matchings: Map[PowerPhrase, List[Int]]): Map[Int, PowerPhrase] = {
-    var freePositions = List.fill(sourceLength)(true)
-    val matchingsWithoutOverlaps = matchings.map {
-      case (power, idxs) =>
-        val movementLength = power.movements.length
 
-        val newIndexes = idxs.tail.foldLeft(List(idxs.head)) {
-          case (acc, i) =>
-            if (acc.last + movementLength <= i && i + movementLength - 1 <= sourceLength) {
-              acc :+ i
-            } else {
-              acc
-            }
-        }
-
-        (power, newIndexes)
-    }.toList
-
-    val sortedMatches = matchingsWithoutOverlaps.sortWith {
+    val sortedMatches = matchings.toList.sortWith {
       case ((powerA, idxsA), (powerB, idxsB)) =>
         if (idxsA.length == idxsB.length)
           powerA.movements.length > powerB.movements.length
@@ -65,7 +49,24 @@ object PowerPhrase {
           idxsA.length > idxsB.length
     }
 
-    sortedMatches.foldLeft(Map[Int, PowerPhrase]()) {
+    val matchingsSortedNoOverlaps = sortedMatches.map {
+      case (power, idxs) =>
+        val movementLength = power.movements.length
+
+        val newIndexes = idxs.tail.foldLeft(List(idxs.head)) {
+          case (acc, i) =>
+            if (acc.last + movementLength <= i) {
+              acc :+ i
+            } else {
+              acc
+            }
+        }
+
+        (power, newIndexes)
+    }
+
+    var freePositions = List.fill(sourceLength)(true)
+    matchingsSortedNoOverlaps.foldLeft(Map[Int, PowerPhrase]()) {
       case (acc, (power, idxs)) =>
 
         val succesfulPlacements = mutable.ArrayBuffer[(Int, PowerPhrase)]()
