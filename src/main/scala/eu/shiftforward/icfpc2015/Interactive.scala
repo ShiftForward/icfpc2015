@@ -18,7 +18,7 @@ object Interactive extends App {
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
-  val solver = new SmartSolver // TODO refactor this
+  val smartSolver = new SmartSolver // TODO refactor this
 
   def clearPreviousLines(lineCount: Int): Unit = {
     print(String.format("\033[%sA", (lineCount + 2).toString))
@@ -50,11 +50,22 @@ object Interactive extends App {
               units = stateUnits.tail))
           case None => loop(state)
         }
+      case ":smartsolver" =>
+        val finalState = smartSolver.play(state).foldLeft(state) { (prevState, command) =>
+          val nextState = prevState.nextState(command)
+
+          println(GameStateRenderer.stateAsString(nextState))
+          Thread.sleep(100)
+          clearPreviousLines(1000)
+
+          nextState
+        }
+        println(GameStateRenderer.stateAsString(finalState))
 
       case ":fit" =>
         println("Possible fits of current piece (with rotations): ")
 
-        val tgts = solver.possibleTargets(state)
+        val tgts = smartSolver.possibleTargets(state)
         val gameStateWithFitsString = GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*))
 
         clearPreviousLines(gameStateString.split("\n").length - 2)

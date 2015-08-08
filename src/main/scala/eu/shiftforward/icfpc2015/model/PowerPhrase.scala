@@ -16,7 +16,7 @@ object PowerPhrase {
     PowerPhrase("R'lyeh"), // from problem 5 grid
     PowerPhrase("Yuggoth")) // from problem 7 grid
 
-  def getMatchings(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
+  def getMatchings(source: Seq[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
     var matching = List[(Int, PowerPhrase)]()
     var matched = Map[PowerPhrase, List[Int]]()
@@ -94,7 +94,7 @@ object PowerPhrase {
     }
   }
 
-  def getBestString(source: List[Command], powerPhrases: List[PowerPhrase] = knownPhrases): String = {
+  def getBestString(source: Seq[Command], powerPhrases: List[PowerPhrase] = knownPhrases): String = {
     val matchings = getMatchings(source, powerPhrases)
     val finalMatchings = flatten(source.length, matchings)
 

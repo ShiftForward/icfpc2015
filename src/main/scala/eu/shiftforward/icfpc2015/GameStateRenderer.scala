@@ -52,6 +52,6 @@ object GameStateRenderer {
       s"Stats\tH ${state.grid.aggHeight} L ${state.grid.aggLow} HL ${state.grid.highLow} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness}\n" +
         s"Current Score: ${state.score.currentScore}"
 
-    previousCommands + "\n" + statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos))
+    statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos)) + "\n" + previousCommands
   }
 }
