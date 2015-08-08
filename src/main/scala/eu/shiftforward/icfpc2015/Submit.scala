@@ -4,13 +4,13 @@ import java.io.File
 
 import eu.shiftforward.icfpc2015.model.Input._
 import eu.shiftforward.icfpc2015.model._
-import eu.shiftforward.icfpc2015.solver.{ NaivePowerPhrasesSolver, Solver }
+import eu.shiftforward.icfpc2015.solver._
 import spray.json._
 
 import scala.io.Source
 
 object Submit extends App {
-  val solver: Solver = NaivePowerPhrasesSolver
+  val solver: Solver = new SmartSolver()
   val solutionTag: Option[String] = None
 
   val cliDryRun = args.contains("--dryrun")

@@ -91,7 +91,9 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
         }
     }
 
-    playAux(initialState)
+    // this is here so that problem 14 terminates
+    if (initialState.grid.width <= 25) playAux(initialState)
+    else NaivePowerPhrasesSolver.play(initialState)
   }
 
   val commandsToTest =
