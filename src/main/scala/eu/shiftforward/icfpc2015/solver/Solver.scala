@@ -47,6 +47,12 @@ object NaivePowerPhrasesSolver extends Solver {
   }
 }
 
+final case class HyperParameters(a: Double = 0.8729920392163335,
+                                 b: Double = 0.20182564826293325,
+                                 c: Double = 0.9400811696297673,
+                                 d: Double = 0.3790167174127723,
+                                 e: Double = -0.34908895269497164,
+                                 f: Double = 0.16749221845450513)
 
 // TODO naming!
 class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Boolean = true) extends Solver {
