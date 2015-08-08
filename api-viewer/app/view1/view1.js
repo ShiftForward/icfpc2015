@@ -24,25 +24,7 @@ angular.module('myApp.view1', ['ngRoute'])
                 .chain(results)
                 .filter(function(r) { return r.score != null && r.powerScore != null; })
                 .map(function(result) {
-                  return { y: result.score, x: new Date(result.createdAt).getTime() / 1000, problemId: result.problemId };
-                })
-                .sortBy(function(r) { return r.x; })
-                .value();
-
-            var powerScoreData = _
-                .chain(results)
-                .filter(function(r) { return r.score != null && r.powerScore != null; })
-                .map(function(result) {
-                  return { y: result.powerScore, x: new Date(result.createdAt).getTime() / 1000, problemId: result.problemId };
-                })
-                .sortBy(function(r) { return r.x; })
-                .value();
-
-            var totalScoreData = _
-                .chain(results)
-                .filter(function(r) { return r.score != null && r.powerScore != null; })
-                .map(function(result) {
-                  return { y: (result.score + result.powerScore), x: new Date(result.createdAt).getTime() / 1000, problemId: result.problemId };
+                  return { y: result.score, x: new Date(result.createdAt).getTime() / 1000, power: result.powerScore, problemId: result.problemId };
                 })
                 .sortBy(function(r) { return r.x; })
                 .value();
@@ -64,23 +46,17 @@ angular.module('myApp.view1', ['ngRoute'])
                   var problemId = e.value.problemId;
                   var date = '<span class="date">' + new Date(x * 1000).toUTCString() + '</span>';
                   var swatch = '<span class="detail_swatch" style="background-color: ' + series.color + '"></span>';
-                  return swatch + series.name + ': ' + y + ' points <br>' + moment(new Date(x * 1000).toUTCString()).calendar() + '<br>';
+                  return swatch + series.name + ': ' + y + ' points <br>' +
+                        e.value.power +' Power Word' + ((e.value.power == 1) ? '' : 's') + ' <br>'
+                        + moment(new Date(x * 1000).toUTCString()).calendar() + '<br>';
                 }
               }
             };
 
             solution.series = [{
               name: "Score",
-              color: 'orange',
-              data: scoreData
-            },{
-              name: "Power Score",
-              color: 'green',
-              data: powerScoreData
-            },{
-              name: "Total Score",
               color: 'steelblue',
-              data: totalScoreData
+              data: scoreData
             }];
 
             //console.log(solution)
