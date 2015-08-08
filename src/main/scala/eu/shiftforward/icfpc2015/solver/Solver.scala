@@ -59,13 +59,13 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
    * The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
    * improve performance or it can even be set to `Nil` to disable power phrase optimization.
    */
-  val powerPhrases = List("Ei!") // PowerPhrase.knownPhrases
+  val powerPhrases = PowerPhrase.knownPhrases
 
   /**
    * A map from power phrases to their list of respective commands and its compiled transformation.
    */
   private[this] val powerPhraseIndex = powerPhrases.map { phrase =>
-    val commands = Command.string(phrase) :+ Command.action(MoveSE) // MoveSE in order to force valid paths
+    val commands = phrase.movements :+ Command.action(MoveSE) // MoveSE in order to force valid paths
     val transform = GridOperations.compileTransform(commands.map(_.action))
     phrase -> (commands, transform)
   }.toMap
@@ -80,7 +80,7 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
 
     // for each game, we keep track of the power phrases we already used
     val unusedPowerPhrases = mutable.HashSet(powerPhrases: _*)
-    val usedPowerPhrases = mutable.HashSet.empty[String]
+    val usedPowerPhrases = mutable.HashSet.empty[PowerPhrase]
 
     // when the time comes to try power phrases, we prefer unused phrases as they are worth more points
     def allPowerPhrases = unusedPowerPhrases.toIterator ++ usedPowerPhrases.toIterator
@@ -129,7 +129,7 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
               // between the unit's initial position and its destination, try to use as many power phrases as possible
               def optimizeForPower(currState: GameState,
                                    currentPath: Seq[Command],
-                                   powerPhrases: Iterator[String]): GameState = {
+                                   powerPhrases: Iterator[PowerPhrase]): GameState = {
                 if (powerPhrases.isEmpty) {
                   // if there are no more power words to try, stop optimizing and execute the previously calculated
                   // shortest path
