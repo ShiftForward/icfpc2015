@@ -2,6 +2,7 @@ package eu.shiftforward.icfpc2015.model
 
 case class Command(ch: Char) {
   def action = Command.invertedMappings(ch)
+  override def toString = ch.toString
 }
 
 sealed trait Action
