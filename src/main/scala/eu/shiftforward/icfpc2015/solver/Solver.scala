@@ -1,9 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015._
-import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
-import scala.collection.mutable
 
 trait Solver {
   def play(initialState: GameState): Seq[Command]
@@ -50,7 +48,7 @@ object NaivePowerPhrasesSolver extends Solver {
 }
 
 // TODO naming!
-class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76) extends Solver {
+class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76, debugOnGameOver: Boolean = true) extends Solver {
 
   def cost(grid: Grid): Double =
     a * grid.aggHeight +
@@ -62,8 +60,11 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
     def playAux(state: GameState, addLock: Boolean = false): Seq[Command] = state.status match {
 
       case GameState.GameOver =>
-        println("GAME OVER")
-        println(GameStateRenderer.stateAsString(state))
+        if (debugOnGameOver) {
+          println("GAME OVER")
+          println(GameStateRenderer.stateAsString(state))
+        }
+
         state.commandHistory
 
       case GameState.Failed =>
@@ -72,7 +73,11 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
       case GameState.Running =>
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
         if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
-        else {
+        else if (addLock) {
+          GameStateRenderer.stateAsString(state)
+          println(state.unitPosState)
+          throw new RuntimeException("Expecting to lock but could to sherlock...")
+        } else {
           val candidates = possibleTargets(state).sortBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
             cost(newGrid)
@@ -122,6 +127,7 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
           newCUnit = cUnit.copy(pos = Cell(col, row))
           if GridOperations.fits(newCUnit, state.grid)
           if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+          if getLockCommand(state.grid, Some(newCUnit)).isDefined
         } yield newCUnit
     }
   }
