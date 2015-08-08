@@ -10,7 +10,9 @@ import scala.util.Random
 case class OptimizationResult(score: Long, parameters: Array[Double])
 
 trait Optimizer {
-  def score(filename: String, hp: Array[Double]) = {
+  val hyperparametersLenght = 36
+
+  protected def score(filename: String, hp: Array[Double]) = {
     val input = Source.fromFile(filename).mkString.parseJson.convertTo[Input]
     val solver = new SmartSolver(hp, debugOnGameOver = false)
     val score = input.sourceSeeds.map { seed =>
@@ -23,22 +25,20 @@ trait Optimizer {
     OptimizationResult(score, hp)
   }
 
-  def optimize(filename: String, maxIter: Int): OptimizationResult
+  def optimize(filename: Array[String], maxIter: Int): OptimizationResult
 }
 
 object RandomOptimizer extends Optimizer {
-  def optimize(filename: String, maxIter: Int) = {
+  def optimize(filename: Array[String], maxIter: Int) = {
     def optimizeAux(iter: Int, bestModel: OptimizationResult): OptimizationResult = iter match {
       case 0 => bestModel
       case i =>
-        val hp = List(
-          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5,
-          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5).toArray
-        val newModel = score(filename, hp)
+        val hp = Array.fill(hyperparametersLenght)((Random.nextDouble() - 0.5) * 2)
+        val newModel = score(filename(0), hp)
         if (newModel.score > bestModel.score) optimizeAux(i - 1, newModel)
         else optimizeAux(i - 1, bestModel)
     }
-    optimizeAux(maxIter, score(filename, Array.fill(6)(0.5)))
+    optimizeAux(maxIter, score(filename(0), Array.fill(hyperparametersLenght)(0.5)))
   }
 }
 
@@ -83,11 +83,6 @@ object GeneticOptimizer extends Optimizer {
       vector.map(_.toDouble / sum)
     }
 
-    @inline private[this] def renormalize(vector: Array[Double]): Array[Double] = {
-      val sum = vector.sum
-      vector.map(_ / sum)
-    }
-
     private[this] def popReproduction(matePool: MatePool): Pool = {
       val normalizedPool = matePool.map(_._1).zip(renormalize(matePool.map(_._2).toArray))
 
@@ -111,14 +106,15 @@ object GeneticOptimizer extends Optimizer {
         if (mutationRate > Random.nextFloat) geneGenerator() else gene))
   }
 
-  def optimize(filename: String, maxIter: Int) = {
+  def optimize(filenames: Array[String], maxIter: Int) = {
     type Specimen = Array[Double]
     type Gene = Double
 
-    def fitness(s: Specimen): Long = score(filename, s).score
-
-    /* implicit def toIterable(s: Specimen): Iterable[Gene] = s.toList
-    implicit def toSpecimen(cs: Iterable[Gene]): Specimen = { cs.toArray } */
+    def fitness(s: Specimen): Long = {
+      filenames.map { filename =>
+        score(filename, s).score
+      }.sum
+    }
 
     val petri = new GeneticExploration[Gene, Specimen](
       0.05, 0.25, 128, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, crossover ratio, max population and gene pool
@@ -128,7 +124,7 @@ object GeneticOptimizer extends Optimizer {
       (iter, _) => iter > 20 // the stop condition
     )
 
-    val best = petri.evolution(petri.toMatePool(petri.randomPool(Array.fill(6)(0.5))))._1.maxBy(_._2)
+    val best = petri.evolution(petri.toMatePool(petri.randomPool(Array.fill(hyperparametersLenght)(0.5))))._1.maxBy(_._2)
 
     println(f"DONE\tBest Fit ${best._2}\tSpecimen ${best._1.toList}")
 
@@ -137,5 +133,5 @@ object GeneticOptimizer extends Optimizer {
 }
 
 object OptimizerMain extends App {
-  println(GeneticOptimizer.optimize(args(0), 20))
+  println(GeneticOptimizer.optimize(args, 20))
 }

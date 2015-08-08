@@ -46,7 +46,16 @@ object NaivePowerPhrasesSolver extends Solver {
 }
 
 // TODO naming!
-class SmartSolver(hp: Array[Double] = List(0.68, 0.13, 0.15, -0.17, 0.18, 0.78).toArray, debugOnGameOver: Boolean = true) extends Solver {
+class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends Solver {
+  def this() {
+    this(Array[Double](
+      0.6812862487709113, 0.6962503566971567, 0.9877984828917505, 0.15411530054800404, 0.3627247745245221, 0.6769634548781425,
+      0.15082259678693277, 0.5375624814841904, 0.8993067309837122, 0.6281152015768006, 0.24698608671027, 0.968920949252077,
+      0.8583215041457246, -0.7868579652841692, -0.41746084239336745, -0.7334865079233237, 0.5413808027616804, -0.14409865820031809,
+      -0.8420084801297596, 0.4428152677933528, 0.6355954337556695, 0.963444704839326, -0.7561614528399963, 0.6310682203780218,
+      0.4247931723888845, -0.1546476943468249, -0.09307656326306568, 0.8182455020378563, -0.42422204684408893, -0.7258365234127515,
+      0.7817453280432134, -0.48307866075879624, 0.2610501481201801, 0.25172818633151484, -0.18295475901828917, 0.21190978311682707))
+  }
 
   /**
    * The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
@@ -186,13 +195,14 @@ class SmartSolver(hp: Array[Double] = List(0.68, 0.13, 0.15, -0.17, 0.18, 0.78).
   /**
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
-  def cost(grid: Grid): Double =
-    hp(0) * grid.aggHeight +
-      hp(1) * grid.bumpiness +
-      hp(2) * grid.holes +
-      hp(3) * grid.fullLines +
-      hp(4) * grid.aggLow +
-      hp(5) * grid.highLow
+  def cost(grid: Grid): Double = {
+    (hp(0) * grid.aggHeight + hp(1) * grid.bumpiness + hp(2) * grid.holes + hp(3) * grid.fullLines + hp(4) * grid.aggLow + hp(5) * grid.highLow) * grid.aggHeight +
+      (hp(6) * grid.aggHeight + hp(7) * grid.bumpiness + hp(8) * grid.holes + hp(9) * grid.fullLines + hp(10) * grid.aggLow + hp(11) * grid.highLow) * grid.bumpiness +
+      (hp(12) * grid.aggHeight + hp(13) * grid.bumpiness + hp(14) * grid.holes + hp(15) * grid.fullLines + hp(16) * grid.aggLow + hp(17) * grid.highLow) * grid.holes +
+      (hp(18) * grid.aggHeight + hp(19) * grid.bumpiness + hp(20) * grid.holes + hp(21) * grid.fullLines + hp(22) * grid.aggLow + hp(23) * grid.highLow) * grid.fullLines +
+      (hp(24) * grid.aggHeight + hp(25) * grid.bumpiness + hp(26) * grid.holes + hp(27) * grid.fullLines + hp(28) * grid.aggLow + hp(29) * grid.highLow) * grid.aggLow +
+      (hp(30) * grid.aggHeight + hp(31) * grid.bumpiness + hp(32) * grid.holes + hp(33) * grid.fullLines + hp(34) * grid.aggLow + hp(35) * grid.highLow) * grid.highLow
+  }
 
   /**
    * Returns a command that locks the current unit in place.
