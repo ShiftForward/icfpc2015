@@ -1,9 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015._
-import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
-import scala.collection.mutable
 
 trait Solver {
   def play(initialState: GameState): Seq[Command]
@@ -50,7 +48,7 @@ object NaivePowerPhrasesSolver extends Solver {
 }
 
 // TODO naming!
-class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76) extends Solver {
+class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76, debugOnGameOver: Boolean = true) extends Solver {
 
   def cost(grid: Grid): Double =
     a * grid.aggHeight +
@@ -62,8 +60,11 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
     def playAux(state: GameState, addLock: Boolean = false): Seq[Command] = state.status match {
 
       case GameState.GameOver =>
-        println("GAME OVER")
-        println(GameStateRenderer.stateAsString(state))
+        if (debugOnGameOver) {
+          println("GAME OVER")
+          println(GameStateRenderer.stateAsString(state))
+        }
+
         state.commandHistory
 
       case GameState.Failed =>
@@ -82,6 +83,8 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
 
           candidates.flatMap(t => pathFinder.pathTo(t)).headOption match {
             case Some(p) =>
+              println("Alguma coisa: " + p)
+
               playAux(state.nextState(p), addLock = true)
             case None =>
               if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
