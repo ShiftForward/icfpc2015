@@ -29,49 +29,53 @@ class PathFinder(grid: Grid, from: UnitPos) {
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
   def pathTo(to: UnitPos): Option[List[Command]] = {
-    val pq = mutable.PriorityQueue[(Int, UnitPos)]()
-    pq.enqueue((0, to))
+    if (!fits(to, grid))
+      None
+    else {
+      val pq = mutable.PriorityQueue[(Int, UnitPos)]()
+      pq.enqueue((0, to))
 
-    def loop() {
-      if (!pq.isEmpty) {
-        val (_, currentPos) = pq.dequeue
-        val dist = if (currentPos == to) 0 else prev(currentPos)._3
-        if (currentPos != from) {
-          commandsToTest.foreach { command =>
-            transform(currentPos, command, grid).foreach { nextPos =>
-              if (!prev.contains(nextPos) && nextPos != to) {
-                prev.update(nextPos, (currentPos, command, dist + 1))
-                pq.enqueue((dist + 1 + nextPos.pos.distance(from.pos), nextPos))
+      def loop() {
+        if (!pq.isEmpty) {
+          val (_, currentPos) = pq.dequeue
+          val dist = if (currentPos == to) 0 else prev(currentPos)._3
+          if (currentPos != from) {
+            commandsToTest.foreach { command =>
+              transform(currentPos, command, grid).foreach { nextPos =>
+                if (!prev.contains(nextPos) && nextPos != to) {
+                  prev.update(nextPos, (currentPos, command, dist + 1))
+                  pq.enqueue((dist + 1 + nextPos.pos.distance(from.pos), nextPos))
+                }
+              }
+            }
+            loop()
+          }
+        }
+      }
+
+      loop()
+
+      prev.get(from) match {
+        case Some(_) =>
+          val c = mutable.ListBuffer[Command]()
+          def go(p: UnitPos) {
+            if (p != to) {
+              prev.get(p) match {
+                case Some((pr, comm, _)) =>
+                  c += comm
+                  go(pr)
+
+                case None => // do nothing
               }
             }
           }
-          loop()
-        }
+
+          go(from)
+          Some(c.map(invertedCommands).toList)
+
+        case None =>
+          None
       }
-    }
-
-    loop()
-
-    prev.get(from) match {
-      case Some(_) =>
-        val c = mutable.ListBuffer[Command]()
-        def go(p: UnitPos) {
-          if (p != to) {
-            prev.get(p) match {
-              case Some((pr, comm, _)) =>
-                c += comm
-                go(pr)
-
-              case None => // do nothing
-            }
-          }
-        }
-
-        go(from)
-        Some(c.map(invertedCommands).toList)
-
-      case None =>
-        None
     }
   }
 }
