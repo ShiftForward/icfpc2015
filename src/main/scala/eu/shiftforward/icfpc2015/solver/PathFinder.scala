@@ -91,7 +91,7 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
 }
 
 class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
-  val commandsToTest = PathFindingUtils.reverseCommandsToTest
+  val commandsToTest = PathFindingUtils.commandsToTest
 
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
