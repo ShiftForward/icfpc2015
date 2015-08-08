@@ -8,6 +8,16 @@ trait Solver {
   def play(initialState: GameState): Seq[Command]
 }
 
+case class PowerPhraseDiscoverySolver(powerPhrase: String) extends Solver {
+  def play(initialState: GameState) = {
+    initialState.nextState(powerPhrase).status match {
+      case GameState.Failed =>
+        throw new Exception("This problem cannot be used to test the specified phrase of power!")
+      case _ => Command.string(powerPhrase)
+    }
+  }
+}
+
 object NaivePowerPhrasesSolver extends Solver {
 
   def play(initialState: GameState) = {
