@@ -71,4 +71,6 @@ angular.module('myApp.view1', ['ngRoute'])
       setInterval(function() { $scope.$broadcast('rickshaw::resize') }, 500);
       setInterval(function() { $scope.$broadcast('rickshaw::resize') }, 999);
     });
+
+    setInterval(function() { location.reload() }, 5 * 60 * 1000);
 }]);
