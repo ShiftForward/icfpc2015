@@ -30,15 +30,18 @@ object Interactive extends App {
         // FIXME: This builds a path to the desired cell without rotating the unit
         val split = str.split(" ")
         val pos = Cell(split(1).toInt, split(2).toInt)
+        val execute = split.size == 4
         val unit = state.currentUnitPos.get.unit
         val path = SmartSolver.findPath(state, UnitPos(unit, pos))
         path match {
           case Some(l) =>
-            println(s"Path to (${pos.x}, ${pos.y}): ${l.map(_.ch).mkString}")
+            val pathStr = l.map(_.ch).mkString
+            println(s"Path to (${pos.x}, ${pos.y}): $pathStr")
+            loop(if (execute) state.nextState(pathStr) else state)
           case None =>
             println(s"No path to (${pos.x}, ${pos.y})")
+            loop(state)
         }
-        loop(state)
 
       case str =>
         loop(state.nextState(str))
