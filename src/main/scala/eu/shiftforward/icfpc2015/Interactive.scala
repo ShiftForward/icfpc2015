@@ -1,10 +1,13 @@
 package eu.shiftforward.icfpc2015
 
+import eu.shiftforward.icfpc2015.GameState.UnitPosState
+import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
 import eu.shiftforward.icfpc2015.solver.SmartSolver
 import spray.json._
 
 import scala.io.Source
+import scala.util.Try
 
 object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
@@ -18,10 +21,22 @@ object Interactive extends App {
 
     if (state.gameOver) println("GAME OVER")
     else readLine("> ") match {
-      case ":q" => // Do Nothing
+      case ":q" => // Quit
+
+      case str if str.startsWith(":skip") =>
+        val split = str.split(" ")
+        val size = Try(split(1).toInt).getOrElse(1)
+        val stateUnits = state.units.drop(size - 1)
+        initialPosition(stateUnits.head, state.grid) match {
+          case Some(newUnit) =>
+            loop(state.copy(
+              unitPosState = Some(UnitPosState(newUnit, Set(newUnit))),
+              units = stateUnits.tail))
+          case None => loop(state)
+        }
+
       case ":fit" =>
         println("Possible fits of current piece (with rotations): ")
-
         val tgts = SmartSolver.possibleTargets(state)
         println(GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*)))
         loop(state)

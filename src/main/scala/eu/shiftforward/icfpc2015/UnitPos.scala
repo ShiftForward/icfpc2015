@@ -20,6 +20,6 @@ case class UnitPos(unit: CellUnit, pos: Cell) {
 
   lazy val topRow: Int = {
     val (topLeft, _) = unit.boundingBox
-    Math.max(0, unit.pivot.row - topLeft.row + pos.y)
+    Math.max(0, pos.y - unit.pivot.row - topLeft.row)
   }
 }
