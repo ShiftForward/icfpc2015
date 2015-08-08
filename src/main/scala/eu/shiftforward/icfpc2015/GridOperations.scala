@@ -56,4 +56,34 @@ object GridOperations {
     case RotateCW => unitPos.copy(unit = unitPos.unit.rotateCW)
     case RotateCCW => unitPos.copy(unit = unitPos.unit.rotateCCW)
   }
+
+  def transformUnitPos(unitPos: UnitPos, transform: Transform): UnitPos = {
+    unitPos.copy(
+      pos = unitPos.pos.copy(
+        x = unitPos.pos.x + (if (unitPos.pos.y % 2 == 0) transform.dx1 else transform.dx2),
+        y = unitPos.pos.y + transform.dy),
+      unit = (1 to transform.dr).foldLeft(unitPos.unit) { (unit, _) => unit.rotateCW })
+  }
+
+  case class Transform(dx1: Int, dx2: Int, dy: Int, dr: Int)
+
+  def compileTransform(actions: Seq[Action]) = {
+    var dx1, dx2, dy, dr = 0
+    var parity = true
+
+    actions.foreach {
+      case MoveW =>
+        dx1 -= 1; dx2 -= 1
+      case MoveE =>
+        dx1 += 1; dx2 += 1
+      case MoveSW =>
+        if (parity) dx1 -= 1 else dx2 -= 1; dy += 1; parity = !parity
+      case MoveSE =>
+        if (parity) dx2 += 1 else dx1 += 1; dy += 1; parity = !parity
+      case RotateCW => dr = (dr + 1) % 6
+      case RotateCCW => dr = (dr + 6 - 1) % 6
+    }
+
+    Transform(dx1, dx2, dy, dr)
+  }
 }
