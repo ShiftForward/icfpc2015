@@ -25,7 +25,7 @@ trait PathFindingUtils {
         if (currentPos != to) {
           commandsToTest.foreach { command =>
             transform(currentPos, command, grid).foreach { nextPos =>
-              if (!prev.contains(nextPos) && nextPos != from) {
+              if ((!prev.contains(nextPos) || prev(nextPos)._3 > dist + 1) && nextPos != from) {
                 prev.update(nextPos, (currentPos, command, dist + 1))
                 pq.enqueue((dist + 1 + nextPos.pos.distance(to.pos), nextPos))
               }
