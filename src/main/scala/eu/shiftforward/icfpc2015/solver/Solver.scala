@@ -165,7 +165,7 @@ object SmartSolver extends Solver {
         for {
           // TODO this positions probably should take the bounding box and pivot into account
           col <- (0 until state.grid.width).toStream
-          row <- (0 until state.grid.height).toStream
+          row <- (cUnit.pos.row until state.grid.height).toStream
           newCUnit = cUnit.copy(pos = Cell(col, row))
           /*piece <- Stream.iterate(Option(newCUnit)) {
             case None => None
