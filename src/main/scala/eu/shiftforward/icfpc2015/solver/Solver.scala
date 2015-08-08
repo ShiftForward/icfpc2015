@@ -123,7 +123,7 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
           // this
           validCandidates.headOption match {
             case Some((dest, path)) =>
-              // val revPathFinder = new ReversePathFinder(state.grid, dest)
+              val revPathFinder = new ReversePathFinder(state.grid, dest)
               // println(s"dest = $dest")
 
               // between the unit's initial position and its destination, try to use as many power phrases as possible
@@ -146,8 +146,8 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
                   // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
 
                   // find a path from that position to the destination
-                  // revPathFinder.pathFrom(unitPosAfterPower) match {
-                  new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                  revPathFinder.pathFrom(unitPosAfterPower) match {
+                    //new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
                     case Some(pathAfterPower) =>
                       // if there is a path, obtain the game state after applying the power commands
                       val newState = currState.nextState(powerCommands)
