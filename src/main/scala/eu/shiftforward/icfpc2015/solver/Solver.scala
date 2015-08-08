@@ -47,14 +47,23 @@ object NaivePowerPhrasesSolver extends Solver {
   }
 }
 
+final case class HyperParameters(a: Double = 0.51, aa: Double = 0.51,
+                                 b: Double = 0.18, bb: Double = 0.18,
+                                 c: Double = 0.36, cc: Double = 0.36,
+                                 d: Double = -0.76, dd: Double = -0.76,
+                                 e: Double = 0, ee: Double = 0,
+                                 f: Double = 0.18, ff: Double = 0.18)
+
 // TODO naming!
-class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76, debugOnGameOver: Boolean = true) extends Solver {
+class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Boolean = true) extends Solver {
 
   def cost(grid: Grid): Double =
-    a * grid.aggHeight +
-      b * grid.bumpiness +
-      c * grid.holes +
-      d * grid.fullLines
+    hp.a * grid.aggHeight + // hp.aa * grid.aggHeight * grid.aggHeight +
+      hp.b * grid.bumpiness + //hp.bb * grid.bumpiness * grid.bumpiness +
+      hp.c * grid.holes + //hp.cc * grid.holes * grid.holes +
+      hp.d * grid.fullLines + //hp.dd * grid.fullLines * grid.fullLines +
+      hp.e * grid.aggLow + //hp.ee * grid.aggLow * grid.aggLow +
+      hp.f * grid.highLow //+ hp.ff * grid.highLow * grid.highLow
 
   def play(initialState: GameState): Seq[Command] = {
     def playAux(state: GameState, addLock: Boolean = false): Seq[Command] = state.status match {

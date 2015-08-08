@@ -7,12 +7,12 @@ import spray.json._
 import scala.io.Source
 import scala.util.Random
 
-case class OptimizationResult(score: Long, parameters: (Double, Double, Double, Double))
+case class OptimizationResult(score: Long, parameters: HyperParameters)
 
 trait Optimizer {
-  def score(filename: String, a: Double, b: Double, c: Double, d: Double) = {
+  def score(filename: String, hp: HyperParameters) = {
     val input = Source.fromFile(filename).mkString.parseJson.convertTo[Input]
-    val solver = new SmartSolver(a, b, c, d, debugOnGameOver = false)
+    val solver = new SmartSolver(hp, debugOnGameOver = false)
     val score = input.sourceSeeds.map { seed =>
       val units = input.orderedUnitsBySeed(seed)
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
@@ -20,7 +20,7 @@ trait Optimizer {
       val solution = solver.play(gameState).toList
       gameState.nextState(solution).score.currentScore
     }.sum / input.sourceSeeds.size
-    OptimizationResult(score, (a, b, c, d))
+    OptimizationResult(score, hp)
   }
 
   def optimize(filename: String, maxIter: Int): OptimizationResult
@@ -31,23 +31,25 @@ object RandomOptimizer extends Optimizer {
     def optimizeAux(iter: Int, bestModel: OptimizationResult): OptimizationResult = iter match {
       case 0 => bestModel
       case i =>
-        val (a, b, c, d) =
-          (Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5)
-        val newModel = score(filename, a, b, c, d)
+        val hp = HyperParameters(
+          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5,
+          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5,
+          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5)
+        val newModel = score(filename, hp)
         if (newModel.score > bestModel.score) optimizeAux(i - 1, newModel)
         else optimizeAux(i - 1, bestModel)
     }
-    optimizeAux(maxIter, score(filename, 0, 0, 0, 0))
+    optimizeAux(maxIter, score(filename, HyperParameters()))
   }
 }
 
 object GeneticOptimizer extends Optimizer {
-  class GeneticExploration[Gene, Specimen <% Iterable[Gene]](val mutationRate: Double,
-                                                             val population: Int,
-                                                             geneGenerator: () => Gene,
-                                                             specimenBuilder: Iterable[Gene] => Specimen,
-                                                             fitnessF: Specimen => Long,
-                                                             stopCondition: (Int, List[Specimen]) => Boolean) {
+  class GeneticExploration[Gene, Specimen](val mutationRate: Double,
+                                           val population: Int,
+                                           geneGenerator: () => Gene,
+                                           specimenBuilder: Iterable[Gene] => Specimen,
+                                           fitnessF: Specimen => Long,
+                                           stopCondition: (Int, List[Specimen]) => Boolean)(implicit ev1: Specimen => Iterable[Gene]) {
 
     type Pool = List[Specimen]
     type MatePool = List[(Specimen, Long)]
@@ -67,7 +69,7 @@ object GeneticOptimizer extends Optimizer {
 
       val best = pool.maxBy(_._2)
 
-      println(f"Epoch $epoch\tBest Fit ${best._2}%4f\tSpecimen ${best._1}")
+      println(f"Epoch $epoch  Best Fit ${best._2}  Specimen ${best._1}")
 
       val newGeneration = popReproduction(pool)
       if (stopCondition(epoch, newGeneration)) (newGeneration, epoch)
@@ -106,24 +108,21 @@ object GeneticOptimizer extends Optimizer {
   }
 
   def optimize(filename: String, maxIter: Int) = {
-    type Specimen = (Double, Double, Double, Double)
+    type Specimen = HyperParameters
     type Gene = Double
 
-    def fitness(s: Specimen): Long = {
-      val (a, b, c, d) = s
-      score(filename, a, b, c, d).score
-    }
+    def fitness(s: Specimen): Long = score(filename, s).score
 
-    implicit def toIterable(s: Specimen): Iterable[Gene] = Array(s._1, s._2, s._3, s._4)
+    implicit def toIterable(s: Specimen): Iterable[Gene] = Array(s.a, s.aa, s.b, s.bb, s.c, s.cc, s.d, s.dd, s.e, s.ee, s.f, s.ff)
 
     val petri = new GeneticExploration[Gene, Specimen](
-      0.1, 100, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, max population and gene pool
-      cs => { val x = cs.toArray; (x(0), x(1), x(2), x(3)) }, // how to build a specimen from genes
+      0.01, 100, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, max population and gene pool
+      cs => { val x = cs.toArray; HyperParameters(x(0), x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11)) }, // how to build a specimen from genes
       fitness, // the fitness function
-      (iter, _) => iter > 10 // the stop condition
+      (iter, _) => iter > 20 // the stop condition
     )
 
-    val best = petri.evolution(petri.toMatePool(petri.randomPool((1, 1, 1, 1))))._1.maxBy(_._2)
+    val best = petri.evolution(petri.toMatePool(petri.randomPool(HyperParameters())))._1.maxBy(_._2)
 
     println(f"DONE\tBest Fit ${best._2}\tSpecimen ${best._1}")
 
