@@ -1,7 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015.GameState
-import eu.shiftforward.icfpc2015.model.{ Output, Grid, Input, Command }
+import eu.shiftforward.icfpc2015.model.{ Grid, Input }
 import spray.json._
 
 import scala.io.Source

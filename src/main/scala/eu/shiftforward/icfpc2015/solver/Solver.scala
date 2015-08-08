@@ -1,9 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015._
-import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
-import scala.collection.mutable
 
 trait Solver {
   def play(initialState: GameState): Seq[Command]
@@ -72,7 +70,11 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
       case GameState.Running =>
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
         if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
-        else {
+        else if (addLock) {
+          GameStateRenderer.stateAsString(state)
+          println(state.unitPosState)
+          throw new RuntimeException("Expecting to lock but could to sherlock...")
+        } else {
           val candidates = possibleTargets(state).sortBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
             cost(newGrid)
@@ -80,8 +82,13 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
 
           val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
 
-          candidates.flatMap(t => pathFinder.pathTo(t)).headOption match {
+          candidates.flatMap(t => { println(t); pathFinder.pathTo(t) }).headOption match {
             case Some(p) =>
+              /* println("Initial state")
+              println(GameStateRenderer.stateAsString(state))
+              println("PATH = " + p.map(_.ch))
+              println("Final state")
+              println(GameStateRenderer.stateAsString(state.nextState(p))) */
               playAux(state.nextState(p), addLock = true)
             case None =>
               if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
@@ -122,6 +129,7 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
           newCUnit = cUnit.copy(pos = Cell(col, row))
           if GridOperations.fits(newCUnit, state.grid)
           if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+          if getLockCommand(state.grid, Some(newCUnit)).isDefined
         } yield newCUnit
     }
   }
