@@ -84,7 +84,8 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
               case None =>
                 if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
                 else {
-                  throw new Exception("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory)
+                  println("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory)
+                  state.commandHistory
                 }
             }
         }
