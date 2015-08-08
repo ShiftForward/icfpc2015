@@ -33,8 +33,7 @@ object RandomOptimizer extends Optimizer {
       case i =>
         val hp = HyperParameters(
           Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5,
-          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5,
-          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5, Random.nextDouble() - 0.5)
+          Random.nextDouble() - 0.5, Random.nextDouble() - 0.5)
         val newModel = score(filename, hp)
         if (newModel.score > bestModel.score) optimizeAux(i - 1, newModel)
         else optimizeAux(i - 1, bestModel)
@@ -45,6 +44,7 @@ object RandomOptimizer extends Optimizer {
 
 object GeneticOptimizer extends Optimizer {
   class GeneticExploration[Gene, Specimen](val mutationRate: Double,
+                                           val crossOverRate: Double,
                                            val population: Int,
                                            geneGenerator: () => Gene,
                                            specimenBuilder: Iterable[Gene] => Specimen,
@@ -76,33 +76,35 @@ object GeneticOptimizer extends Optimizer {
       else evolution(newGeneration, epoch + 1)
     }
 
-    def matePool(pool: Pool): MatePool = {
-      val fitnesses = pool.map(fitnessF).toArray
+    private[this] def matePool(pool: Pool): MatePool = {
+      val fitnesses = pool.par.map(fitnessF).toArray
       pool.zip(fitnesses)
     }
 
-    def renormalize(vector: Array[Long]): Array[Double] = {
+    @inline private[this] def renormalize(vector: Array[Long]): Array[Double] = {
       val sum = vector.sum
       vector.map(_.toDouble / sum)
     }
 
-    def popReproduction(matePool: MatePool): Pool = {
+    private[this] def popReproduction(matePool: MatePool): Pool = {
       val normalizedPool = matePool.map(_._1).zip(renormalize(matePool.map(_._2).toArray))
-      (1 to population).par.map(_ =>
-        crossover(monteCarlo(normalizedPool), monteCarlo(normalizedPool))).toList
+
+      // Preserve the better specimen (elitist)
+      (matePool.maxBy(_._2)._1 +: (1 to population).par.map(_ =>
+        crossover(monteCarlo(normalizedPool), monteCarlo(normalizedPool)))).toList
     }
 
-    def monteCarlo[A](weightedList: List[(A, Double)]): A =
+    private[this] def monteCarlo[A](weightedList: List[(A, Double)]): A =
       weightedList(Random.nextInt(weightedList.length)) match {
         case (s, f) if f > Random.nextFloat => s
         case _ => monteCarlo(weightedList)
       }
 
-    def crossover(a: Specimen, b: Specimen): Specimen =
+    private[this] def crossover(a: Specimen, b: Specimen): Specimen =
       mutate(specimenBuilder(a.zip(b).map(gene =>
-        if (Random.nextFloat >= 0.5) gene._1 else gene._2)))
+        if (Random.nextFloat >= crossOverRate) gene._1 else gene._2)))
 
-    def mutate(s: Specimen): Specimen =
+    private[this] def mutate(s: Specimen): Specimen =
       specimenBuilder(s.map(gene =>
         if (mutationRate > Random.nextFloat) geneGenerator() else gene))
   }
@@ -113,11 +115,11 @@ object GeneticOptimizer extends Optimizer {
 
     def fitness(s: Specimen): Long = score(filename, s).score
 
-    implicit def toIterable(s: Specimen): Iterable[Gene] = Array(s.a, s.aa, s.b, s.bb, s.c, s.cc, s.d, s.dd, s.e, s.ee, s.f, s.ff)
+    implicit def toIterable(s: Specimen): Iterable[Gene] = Array(s.a, s.b, s.c, s.d, s.e, s.f)
 
     val petri = new GeneticExploration[Gene, Specimen](
-      0.01, 100, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, max population and gene pool
-      cs => { val x = cs.toArray; HyperParameters(x(0), x(1), x(2), x(3), x(4), x(5), x(6), x(7), x(8), x(9), x(10), x(11)) }, // how to build a specimen from genes
+      0.01, 0.25, 128, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, crossover ratio, max population and gene pool
+      cs => { val x = cs.toArray; HyperParameters(x(0), x(1), x(2), x(3), x(4), x(5)) }, // how to build a specimen from genes
       fitness, // the fitness function
       (iter, _) => iter > 20 // the stop condition
     )
