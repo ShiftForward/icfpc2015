@@ -5,27 +5,13 @@ import spray.json.DefaultJsonProtocol._
 
 import scala.collection.mutable
 
-case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
-  val directions = Array(
-    Array(
-      Cell(1, 0), Cell(0, -1), Cell(-1, -1),
-      Cell(-1, 0), Cell(-1, 1), Cell(0, 1)),
-    Array(
-      Cell(1, 0), Cell(1, -1), Cell(0, -1),
-      Cell(-1, 0), Cell(0, 1), Cell(1, 1)))
-
-  def neighbors(cell: Cell, direction: Int) = {
-    val parity = cell.y & 1
-    val dir = directions(parity)(direction)
-    (cell.x + dir.x, cell.y + dir.y)
-  }
-
-  def colHeight(c: Int) = {
+final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
+  private[this] def colHeight(c: Int) = {
     val h = column(c).indexWhere(identity)
     if (h < 0) 0 else height - h
   }
 
-  def colHoles(c: Int) = {
+  private[this] def colHoles(c: Int) = {
     column(c).dropWhile(p => !p).count(p => !p)
   }
 
@@ -55,9 +41,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
 
   lazy val highLow = aggHeight - aggLow
 
-  def row(r: Int): Array[Boolean] = grid(r)
-  def column(c: Int): Array[Boolean] = grid.map(_(c))
-
+  private[this] def column(c: Int): Array[Boolean] = grid.map(_(c))
   def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
   def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
@@ -76,16 +60,16 @@ object Grid {
   def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](height, width))
 }
 
-case class Cube(x: Int, y: Int, z: Int) {
+final case class Cube(x: Int, y: Int, z: Int) {
   def rotateCW = Cube(-z, -x, -y)
   def rotateCCW = Cube(-y, -z, -x)
   def distance(that: Cube) =
     (math.abs(this.x - that.x) + math.abs(this.y - that.y) + math.abs(this.z - that.z)) / 2
 }
 
-case class Cell(x: Int, y: Int) {
-  def col = x
-  def row = y
+final case class Cell(x: Int, y: Int) {
+  @inline def col = x
+  @inline def row = y
 
   def cube = {
     val x = col - (row - (row & 1)) / 2
@@ -130,7 +114,7 @@ object Cell {
   }
 }
 
-case class CellUnit(members: Set[Cell], pivot: Cell) {
+final case class CellUnit(members: Set[Cell], pivot: Cell) {
   def rotateCCW = CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
   def rotateCW = CellUnit(members.map(_.rotateCW(pivot)), pivot)
@@ -142,13 +126,13 @@ case class CellUnit(members: Set[Cell], pivot: Cell) {
   }
 }
 
-case class Input(id: Int,
-                 units: List[CellUnit],
-                 width: Int,
-                 height: Int,
-                 filled: List[Cell],
-                 sourceLength: Int,
-                 sourceSeeds: List[Int]) {
+final case class Input(id: Int,
+                       units: List[CellUnit],
+                       width: Int,
+                       height: Int,
+                       filled: List[Cell],
+                       sourceLength: Int,
+                       sourceSeeds: List[Int]) {
 
   def orderedUnitsByGame(idx: Int) = orderedUnitsBySeed(sourceSeeds(idx))
   def orderedUnitsBySeed(seed: Int) = Utils.random(seed).map(rnd => units(rnd.toInt % units.length)).take(sourceLength).toList
