@@ -1,9 +1,9 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015.{ GameState, GridOperations, UnitPos }
+import eu.shiftforward.icfpc2015.{ GameStateRenderer, GameState, GridOperations, UnitPos }
 import eu.shiftforward.icfpc2015.GameState._
 import eu.shiftforward.icfpc2015.GridOperations._
-import eu.shiftforward.icfpc2015.model.{ Cell, Command }
+import eu.shiftforward.icfpc2015.model.{ Grid, Cell, Command }
 import scala.collection.mutable
 
 trait Solver {
@@ -51,14 +51,28 @@ object NaivePowerPhrasesSolver extends Solver {
 }
 
 object SmartSolver extends Solver {
+
+  def reward(grid: Grid): Double = -grid.aggHeight // TODO update this
+
   def play(initialState: GameState): Seq[Command] = {
     def playAux(state: GameState, commands: Seq[Command]): Seq[Command] =
-      if (state.gameOver) commands
-      else {
-        possibleTargets(initialState).map(t => findPath(initialState, t)).find(_.isEmpty).flatten match {
-          case Some(p) => playAux(state.nextState(p), commands ++ p)
-          case None => commands
-        }
+      if (state.gameOver) {
+        println("GAME OVER")
+        println(GameStateRenderer.asString(state.grid))
+        commands
+      } else {
+        possibleTargets(state).sortBy { newUnitPos =>
+          val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
+          reward(newGrid)
+        }.reverse
+          .flatMap(t => findPath(state, t)).headOption match {
+            // FIXME Add command to lock piece (Remove Command('a'))
+            case Some(p) => playAux(state.nextState(p :+ Command('a')), commands ++ p :+ Command('a'))
+            case None =>
+              println("NO PATHS FOUND")
+              println(GameStateRenderer.asString(state.grid))
+              commands
+          }
       }
 
     playAux(initialState, Nil)
