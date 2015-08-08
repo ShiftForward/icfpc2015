@@ -1,5 +1,7 @@
 package eu.shiftforward.icfpc2015
 
+import java.io._
+
 import eu.shiftforward.icfpc2015.GameState.UnitPosState
 import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
@@ -18,8 +20,20 @@ object Interactive extends App {
 
   val solver = new SmartSolver // TODO refactor this
 
+  def clearPreviousLines(lineCount: Int): Unit = {
+    print(String.format("\033[%sA", (lineCount + 2).toString))
+    print(String.format("\033[2J"))
+  }
+
+  val upString = new String(Array[Byte](27, 91, 65))
+  val downString = new String(Array[Byte](27, 91, 66))
+  val leftString = new String(Array[Byte](27, 91, 67))
+  val rightString = new String(Array[Byte](27, 91, 68))
+
   def loop(state: GameState): Unit = try {
-    println(GameStateRenderer.stateAsString(state))
+    val gameStateString = GameStateRenderer.stateAsString(state)
+    clearPreviousLines(1000)
+    println(gameStateString)
 
     if (state.gameOver) println("GAME OVER")
     else StdIn.readLine("> ") match {
@@ -41,7 +55,12 @@ object Interactive extends App {
         println("Possible fits of current piece (with rotations): ")
 
         val tgts = solver.possibleTargets(state)
-        println(GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*)))
+        val gameStateWithFitsString = GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*))
+
+        clearPreviousLines(gameStateString.split("\n").length - 2)
+        println(gameStateWithFitsString)
+        println("<press enter to continue>")
+        StdIn.readLine()
         loop(state)
 
       case str if str.startsWith(":path") =>
@@ -62,6 +81,14 @@ object Interactive extends App {
             loop(state)
         }
 
+      case s if s == upString =>
+        loop(state.nextState(Command.mappings(MoveNW).head))
+      case s if s == downString =>
+        loop(state.nextState(Command.mappings(MoveSE).head))
+      case s if s == leftString =>
+        loop(state.nextState(Command.mappings(MoveE).head))
+      case s if s == rightString =>
+        loop(state.nextState(Command.mappings(MoveW).head))
       case str =>
         loop(state.nextState(str))
     }

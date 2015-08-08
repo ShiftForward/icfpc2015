@@ -18,18 +18,14 @@ import scala.collection.mutable
 
 final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   private[this] def colHeight(c: Int) = {
-    val h = column(c).indexWhere(identity)
+    val h = grid.indexWhere(_(c))
     if (h < 0) 0 else height - h
-  }
-
-  private[this] def colHoles(c: Int) = {
-    column(c).dropWhile(p => !p).count(p => !p)
   }
 
   lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
     val firstHeight = colHeight(0)
-    val firstHoles = colHoles(0)
-    val firstFilledLines = column(0).zipWithIndex.filter(_._1).map(_._2)
+    val firstHoles = (1 to firstHeight).count { h => !grid(height - h)(0) }
+    val firstFilledLines = ((height - firstHeight) until height).filter { row => grid(row)(0) }
     var col = 1
     var maxHeight = firstHeight
     var minHeight = firstHeight
@@ -42,7 +38,7 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
       maxHeight = math.max(newHeight, maxHeight)
       minHeight = math.min(newHeight, minHeight)
       bumpAcc += math.abs(newHeight - oldHeight)
-      holesAcc += colHoles(col)
+      holesAcc += (1 to newHeight).count { h => !grid(height - h)(col) }
       linesAcc.retain { row => grid(row)(col) }
       oldHeight = newHeight
       col += 1
