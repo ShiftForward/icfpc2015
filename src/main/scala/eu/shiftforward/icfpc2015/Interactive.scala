@@ -13,8 +13,9 @@ import scala.util.Try
 
 object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
+  val seedIndex = if (args.size > 1) args(1).toInt else 0
 
-  val units = input.orderedUnitsBySeed(input.sourceSeeds.head)
+  val units = input.orderedUnitsBySeed(input.sourceSeeds(seedIndex))
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
