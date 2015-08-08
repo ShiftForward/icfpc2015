@@ -13,7 +13,7 @@ object Interactive extends App {
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
-  def loop(state: GameState): Unit = {
+  def loop(state: GameState): Unit = try {
     println(GameStateRenderer.stateAsString(state))
 
     if (state.gameOver) println("GAME OVER")
@@ -43,6 +43,10 @@ object Interactive extends App {
       case str =>
         loop(state.nextState(str))
     }
+  } catch {
+    case t: Throwable =>
+      t.printStackTrace()
+      loop(state)
   }
 
   loop(GameState(grid, units))
