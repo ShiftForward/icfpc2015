@@ -50,9 +50,9 @@ object NaivePowerPhrasesSolver extends Solver {
 }
 
 // TODO naming!
-class SmartSolver(a: Double = -0.51, b: Double = -0.18, c: Double = -0.36, d: Double = 0.76) extends Solver {
+class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Double = -0.76) extends Solver {
 
-  def reward(grid: Grid): Double =
+  def cost(grid: Grid): Double =
     a * grid.aggHeight +
       b * grid.bumpiness +
       c * grid.holes +
@@ -75,7 +75,7 @@ class SmartSolver(a: Double = -0.51, b: Double = -0.18, c: Double = -0.36, d: Do
         else {
           val candidates = possibleTargets(state).sortBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-            -reward(newGrid)
+            cost(newGrid)
           }
 
           candidates.flatMap(t => findPath(state, t)).headOption match {
@@ -173,13 +173,6 @@ class SmartSolver(a: Double = -0.51, b: Double = -0.18, c: Double = -0.36, d: Do
           col <- (0 until state.grid.width).toStream
           row <- (cUnit.pos.row until state.grid.height).toStream
           newCUnit = cUnit.copy(pos = Cell(col, row))
-          /*piece <- Stream.iterate(Option(newCUnit)) {
-            case None => None
-            case Some(e) => GridOperations.transform(e, Command('d'), state.grid)
-          }.take(6)
-          p <- piece
-          if GridOperations.fits(p, state.grid)
-          */
           if GridOperations.fits(newCUnit, state.grid)
           if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
         } yield newCUnit
