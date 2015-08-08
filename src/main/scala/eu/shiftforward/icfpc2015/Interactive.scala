@@ -16,6 +16,8 @@ object Interactive extends App {
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
 
+  val solver = new SmartSolver // TODO refactor this
+
   def loop(state: GameState): Unit = try {
     println(GameStateRenderer.stateAsString(state))
 
@@ -37,7 +39,8 @@ object Interactive extends App {
 
       case ":fit" =>
         println("Possible fits of current piece (with rotations): ")
-        val tgts = SmartSolver.possibleTargets(state)
+
+        val tgts = solver.possibleTargets(state)
         println(GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*)))
         loop(state)
 
@@ -47,7 +50,7 @@ object Interactive extends App {
         val pos = Cell(split(1).toInt, split(2).toInt)
         val execute = split.size == 4
         val unit = state.currentUnitPos.get.unit
-        val path = SmartSolver.findPath(state, UnitPos(unit, pos))
+        val path = solver.findPath(state, UnitPos(unit, pos))
         path match {
           case Some(l) =>
             val pathStr = l.map(_.ch).mkString

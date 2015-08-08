@@ -8,7 +8,7 @@ import spray.json._
 import scala.io.Source
 
 object SolverDebugger extends App {
-  val solver: Solver = SmartSolver
+  val solver: Solver = new SmartSolver
 
   val solutionTag: Option[String] = None
 
