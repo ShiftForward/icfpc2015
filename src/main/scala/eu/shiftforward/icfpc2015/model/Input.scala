@@ -5,6 +5,17 @@ import spray.json.DefaultJsonProtocol._
 
 import scala.collection.mutable
 
+/* final class BitSet2DArray(width: Int, height: Int) {
+  var grid = Array.fill(height) { mutable.BitSet() }
+
+  def apply(x: Int, y: Int) = grid(y)(x)
+  def set(x: Int, y: Int) = grid(y) += x
+  def clone(): BitSet2DArray = {
+    val newGrid = new BitSet2DArray(width, height)
+    newGrid.grid = grid.clone()
+  }
+} */
+
 final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   private[this] def colHeight(c: Int) = {
     val h = column(c).indexWhere(identity)
@@ -44,16 +55,17 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   private[this] def column(c: Int): Array[Boolean] = grid.map(_(c))
   def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
-  def updatedInnerGrid(gridState: Array[Array[Boolean]], cell: Cell, value: Boolean) =
-    gridState.updated(cell.row, gridState(cell.row).updated(cell.col, value))
+  def filled(cells: Cell*) = {
+    val newGrid = grid.map(_.clone())
+    cells.foreach { cell => newGrid(cell.row)(cell.col) = true }
+    copy(grid = newGrid)
+  }
 
-  def filled(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
-    updatedInnerGrid(oldGrid, cell, value = true)
-  })
-
-  def removed(cells: Cell*) = copy(grid = cells.foldLeft(grid) { (oldGrid, cell) =>
-    updatedInnerGrid(oldGrid, cell, value = false)
-  })
+  def removed(cells: Cell*) = {
+    val newGrid = grid.map(_.clone())
+    cells.foreach { cell => newGrid(cell.row)(cell.col) = false }
+    copy(grid = newGrid)
+  }
 }
 
 object Grid {
