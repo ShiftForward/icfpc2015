@@ -99,10 +99,10 @@ class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
     if (!fits(to, grid) || !fits(from, grid))
       None
     else {
-      pathFindingLoop(from, to, grid)
+      pathFindingLoop(to, from, grid)
 
-      prev.get(to) match {
-        case Some(_) => Some(buildPath(from, to).reverse)
+      prev.get(from) match {
+        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
         case None => None
       }
     }
