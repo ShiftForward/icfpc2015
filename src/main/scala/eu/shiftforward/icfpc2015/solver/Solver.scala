@@ -124,11 +124,11 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
           // TODO this positions probably should take the bounding box and pivot into account
           col <- (0 until state.grid.width).toStream
           row <- (cUnit.pos.row until state.grid.height).toStream
-          newCUnit = cUnit.copy(pos = Cell(col, row))
-          if GridOperations.fits(newCUnit, state.grid)
-          if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
-          if getLockCommand(state.grid, Some(newCUnit)).isDefined
-        } yield newCUnit
+          movedCUnit = cUnit.copy(pos = Cell(col, row))
+          rotatedCUnit <- Stream.iterate(movedCUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
+          if GridOperations.fits(rotatedCUnit, state.grid)
+          if rotatedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+        } yield rotatedCUnit
     }
   }
 }

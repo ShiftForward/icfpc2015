@@ -15,8 +15,7 @@ case class UnitPos(unit: CellUnit, pos: Cell) {
   }
 
   lazy val kernel: Set[Cell] =
-    Command.all.toSet.flatMap { act: Action => GridOperations.transformUnitPos(this, act).cells } ++
-      Stream.iterate(this) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.tail.take(5).flatMap(_.cells).toSet
+    Command.all.toSet.flatMap { act: Action => GridOperations.transformUnitPos(this, act).cells }
 
   lazy val topRow: Int = {
     val (topLeft, _) = unit.boundingBox
