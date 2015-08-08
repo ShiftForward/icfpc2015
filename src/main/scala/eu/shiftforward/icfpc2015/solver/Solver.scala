@@ -1,9 +1,8 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015.{ GameStateRenderer, GameState, GridOperations, UnitPos }
-import eu.shiftforward.icfpc2015.GameState._
+import eu.shiftforward.icfpc2015._
 import eu.shiftforward.icfpc2015.GridOperations._
-import eu.shiftforward.icfpc2015.model.{ Grid, Cell, Command }
+import eu.shiftforward.icfpc2015.model._
 import scala.collection.mutable
 
 trait Solver {
@@ -74,20 +73,21 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
         if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
         else {
-          possibleTargets(state).sortBy { newUnitPos =>
+          val candidates = possibleTargets(state).sortBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-            reward(newGrid)
-          }.reverse
-            .flatMap(t => findPath(state, t)).headOption match {
-              case Some(p) =>
-                playAux(state.nextState(p), addLock = true)
-              case None =>
-                if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
-                else {
-                  println("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory)
-                  state.commandHistory
-                }
-            }
+            -reward(newGrid)
+          }
+
+          candidates.flatMap(t => findPath(state, t)).headOption match {
+            case Some(p) =>
+              playAux(state.nextState(p), addLock = true)
+            case None =>
+              if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
+              else {
+                println("SmartSolver could not reach game over!\nCommand History:" + state.commandHistory)
+                state.commandHistory
+              }
+          }
         }
     }
 
