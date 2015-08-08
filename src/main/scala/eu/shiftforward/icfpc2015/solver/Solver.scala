@@ -133,20 +133,20 @@ object SmartSolver extends Solver {
       case None => Stream.empty
       case Some(cUnit) =>
         for {
+          // TODO this positions probably should take the bounding box and pivot into account
           col <- (0 until state.grid.width).toStream
           row <- (0 until state.grid.height).toStream
-
           newCUnit = cUnit.copy(pos = Cell(col, row))
-
-          piece <- Stream.iterate(Option(newCUnit)) {
+          /*piece <- Stream.iterate(Option(newCUnit)) {
             case None => None
             case Some(e) => GridOperations.transform(e, Command('d'), state.grid)
           }.take(6)
-
           p <- piece
-
           if GridOperations.fits(p, state.grid)
-        } yield p
+          */
+          if GridOperations.fits(newCUnit, state.grid)
+          if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+        } yield newCUnit
     }
   }
 }

@@ -13,4 +13,8 @@ case class UnitPos(unit: CellUnit, pos: Cell) {
       Cell(cubedCell.copy(cubedCell.x + x, cubedCell.y + y, cubedCell.z + z))
     }
   }
+
+  lazy val kernel: Set[Cell] =
+    Command.all.toSet.flatMap { act: Action => GridOperations.transformUnitPos(this, act).cells } ++
+      Stream.iterate(this) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.tail.take(5).flatMap(_.cells).toSet
 }

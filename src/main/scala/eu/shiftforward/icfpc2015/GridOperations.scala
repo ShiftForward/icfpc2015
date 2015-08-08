@@ -33,16 +33,20 @@ object GridOperations {
     else None
   }
 
-  def fits(unitPos: UnitPos, grid: Grid): Boolean = {
-    unitPos.cells.forall {
-      case Cell(x, y) =>
-        x >= 0 && x < grid.width &&
-          y >= 0 && y < grid.height &&
-          !grid.isFilled(x, y)
-    }
+  def cellFits(cell: Cell, grid: Grid): Boolean = cell match {
+    case Cell(x, y) =>
+      x >= 0 && x < grid.width &&
+        y >= 0 && y < grid.height &&
+        !grid.isFilled(x, y)
   }
 
-  def transformUnitPos(unitPos: UnitPos, command: Command): UnitPos = command.action match {
+  def fits(unitPos: UnitPos, grid: Grid): Boolean = {
+    unitPos.cells.forall { cell => cellFits(cell, grid) }
+  }
+
+  def transformUnitPos(unitPos: UnitPos, command: Command): UnitPos = transformUnitPos(unitPos, command.action)
+
+  def transformUnitPos(unitPos: UnitPos, action: Action): UnitPos = action match {
     case MoveW => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - 1))
     case MoveE => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x + 1))
     case MoveSW => unitPos.copy(pos = unitPos.pos.copy(x = unitPos.pos.x - (if (unitPos.pos.y % 2 == 0) 1 else 0), y = unitPos.pos.y + 1))
