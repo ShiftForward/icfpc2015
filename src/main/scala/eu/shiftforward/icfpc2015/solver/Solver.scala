@@ -122,8 +122,8 @@ class SmartSolver(a: Double = 0.51, b: Double = 0.18, c: Double = 0.36, d: Doubl
       case Some(cUnit) =>
         for {
           // TODO this positions probably should take the bounding box and pivot into account
-          col <- (0 until state.grid.width).toStream
-          row <- (cUnit.pos.row until state.grid.height).toStream
+          col <- (state.grid.width until 0 by -1).toStream
+          row <- (state.grid.height until cUnit.pos.row by -1).toStream
           newCUnit = cUnit.copy(pos = Cell(col, row))
           if GridOperations.fits(newCUnit, state.grid)
           if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
