@@ -58,22 +58,21 @@ trait PathFindingUtils {
   }
 }
 
-class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
-  val commandsToTest = Seq(
-    Command('p'),
-    Command('b'),
-    Command('`'),
-    Command('´'),
-    Command('d'),
-    Command('k'))
+object PathFindingUtils {
+  final val commandsToTest = Seq(MoveW, MoveE, MoveNW, MoveNE, RotateCW, RotateCCW).map(Command.action)
+  final val reverseCommandsToTest = Seq(MoveE, MoveW, MoveSE, MoveSW, RotateCCW, RotateCW).map(Command.action)
 
-  val invertedCommands = Map(
-    Command('p') -> Command('b'),
-    Command('b') -> Command('p'),
-    Command('`') -> Command('l'),
-    Command('´') -> Command('a'),
-    Command('d') -> Command('k'),
-    Command('k') -> Command('d'))
+  final val invertedCommands = Map(
+    MoveW -> MoveE,
+    MoveE -> MoveW,
+    MoveNW -> MoveSE,
+    MoveNE -> MoveSW,
+    RotateCW -> RotateCCW,
+    RotateCCW -> RotateCW).map { case (k, v) => (Command.action(k), Command.action(v)) }
+}
+
+class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
+  val commandsToTest = PathFindingUtils.commandsToTest
 
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
@@ -84,7 +83,7 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
       pathFindingLoop(to, from, grid)
 
       prev.get(from) match {
-        case Some(_) => Some(buildPath(to, from).map(invertedCommands))
+        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
         case None => None
       }
     }
@@ -92,13 +91,7 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
 }
 
 class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
-  val commandsToTest = Seq(
-    Command('b'),
-    Command('p'),
-    Command('l'),
-    Command('a'),
-    Command('k'),
-    Command('d'))
+  val commandsToTest = PathFindingUtils.reverseCommandsToTest
 
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
