@@ -52,13 +52,13 @@ object NaivePowerPhrasesSolver extends Solver {
 
 object SmartSolver extends Solver {
 
-  def reward(grid: Grid): Double = -grid.aggHeight // TODO update this
+  def reward(grid: Grid): Double = -grid.aggHeight + 100 * grid.fullLines // TODO update this
 
   def play(initialState: GameState): Seq[Command] = {
     def playAux(state: GameState, commands: Seq[Command], addLock: Boolean = false): Seq[Command] =
       if (state.gameOver) {
         println("GAME OVER")
-        println(GameStateRenderer.asString(state.grid))
+        println(GameStateRenderer.stateAsString(state))
         commands
       } else {
         lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
@@ -73,7 +73,7 @@ object SmartSolver extends Solver {
                 playAux(state.nextState(p), commands ++ p, addLock = true)
               case None =>
                 println("NO PATHS FOUND")
-                println(GameStateRenderer.asString(state.grid))
+                println(GameStateRenderer.stateAsString(state))
                 commands
             }
         }
