@@ -75,10 +75,6 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
     Command('d') -> Command('k'),
     Command('k') -> Command('d'))
 
-  implicit val ordering = new Ordering[(Int, UnitPos)] {
-    def compare(p1: (Int, UnitPos), p2: (Int, UnitPos)) = p1._1 compare p2._1
-  }.reverse
-
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
   def pathTo(to: UnitPos): Option[List[Command]] = {
@@ -103,10 +99,6 @@ class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
     Command('a'),
     Command('k'),
     Command('d'))
-
-  implicit val ordering = new Ordering[(Int, UnitPos)] {
-    def compare(p1: (Int, UnitPos), p2: (Int, UnitPos)) = p1._1 compare p2._1
-  }.reverse
 
   val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
