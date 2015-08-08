@@ -25,6 +25,20 @@ object Interactive extends App {
         val tgts = SmartSolver.possibleTargets(state)
         println(GameStateRenderer.asString(state.grid.filled(tgts.flatMap(_.cells): _*)))
         loop(state)
+
+      case str if str.startsWith(":path") =>
+        val split = str.split(" ")
+        val pos = Cell(split(1).toInt, split(2).toInt)
+        val unit = state.currentUnitPos.get.unit
+        val path = SmartSolver.findPath(state, UnitPos(unit, pos))
+        path match {
+          case Some(l) =>
+            println(s"Path to (${pos.x}, ${pos.y}): ${l.map(_.ch).mkString}")
+          case None =>
+            println(s"No path to (${pos.x}, ${pos.y})")
+        }
+        loop(state)
+
       case str =>
         loop(state.nextState(str))
     }
