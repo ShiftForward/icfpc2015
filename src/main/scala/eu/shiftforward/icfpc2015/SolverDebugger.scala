@@ -14,6 +14,8 @@ object SolverDebugger extends App {
 
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
 
+  val startTime = System.currentTimeMillis()
+
   input.sourceSeeds.map { seed =>
     val units = input.orderedUnitsBySeed(seed)
     val grid = Grid(input.width, input.height).filled(input.filled: _*)
@@ -23,4 +25,9 @@ object SolverDebugger extends App {
 
     Output(input.id, seed, solutionTag, solver.play(GameState(grid, units)).toList)
   }
+
+  val endTime = System.currentTimeMillis()
+
+  println("Results obtained in " + (endTime - startTime) + " ms")
+
 }
