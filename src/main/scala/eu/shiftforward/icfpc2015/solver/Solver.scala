@@ -50,9 +50,14 @@ object NaivePowerPhrasesSolver extends Solver {
   }
 }
 
-object SmartSolver extends Solver {
+// TODO naming!
+class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Double = 100.0) extends Solver {
 
-  def reward(grid: Grid): Double = -grid.aggHeight + 100 * grid.fullLines // TODO update this
+  def reward(grid: Grid): Double =
+    a * grid.aggHeight +
+      b * grid.bumpiness +
+      c * grid.holes +
+      d * grid.fullLines
 
   def play(initialState: GameState): Seq[Command] = {
     def playAux(state: GameState, commands: Seq[Command], addLock: Boolean = false): Seq[Command] =
