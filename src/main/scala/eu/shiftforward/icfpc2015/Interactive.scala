@@ -27,6 +27,7 @@ object Interactive extends App {
         loop(state)
 
       case str if str.startsWith(":path") =>
+        // FIXME: This builds a path to the desired cell without rotating the unit
         val split = str.split(" ")
         val pos = Cell(split(1).toInt, split(2).toInt)
         val unit = state.currentUnitPos.get.unit
