@@ -8,12 +8,13 @@ case class PowerPhrase(text: List[Char]) {
 }
 
 object PowerPhrase {
+  def apply(text: String): PowerPhrase = new PowerPhrase(text.toList)
 
   val knownPhrases = List(
-    "Ei!", // from statement
-    "Ia! Ia!", // from problem 3 grid
-    "R'lyeh", // from problem 5 grid
-    "Yuggoth") // from problem 7 grid
+    PowerPhrase("Ei!"), // from statement
+    PowerPhrase("Ia! Ia!"), // from problem 3 grid
+    PowerPhrase("R'lyeh"), // from problem 5 grid
+    PowerPhrase("Yuggoth")) // from problem 7 grid
 
   def getMatchings(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
@@ -93,7 +94,7 @@ object PowerPhrase {
     }
   }
 
-  def getBestString(source: List[Command], powerPhrases: List[PowerPhrase]): String = {
+  def getBestString(source: List[Command], powerPhrases: List[PowerPhrase] = knownPhrases): String = {
     val matchings = getMatchings(source, powerPhrases)
     val finalMatchings = flatten(source.length, matchings)
 

@@ -11,7 +11,7 @@ trait Solver {
 object NaivePowerPhrasesSolver extends Solver {
 
   def play(initialState: GameState) = {
-    val wordsIter = Iterator.continually(PowerPhrase.knownPhrases).flatten.map(_.toList)
+    val wordsIter = Iterator.continually(PowerPhrase.knownPhrases).flatten.map(_.text)
 
     def fillUntilGameOver(state: GameState,
                           nextCommands: List[Char],
