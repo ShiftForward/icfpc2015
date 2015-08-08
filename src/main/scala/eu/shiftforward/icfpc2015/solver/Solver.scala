@@ -82,9 +82,12 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
               case Some(p) =>
                 playAux(state.nextState(p), addLock = true)
               case None =>
-                println("NO PATHS FOUND")
-                println(GameStateRenderer.stateAsString(state))
-                state.commandHistory
+                if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
+                else {
+                  println("NO PATHS FOUND")
+                  println(GameStateRenderer.stateAsString(state))
+                  state.commandHistory
+                }
             }
         }
     }
