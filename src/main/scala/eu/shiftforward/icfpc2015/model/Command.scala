@@ -23,7 +23,7 @@ object Command {
 
   def char(ch: Char) = Command(ch.toLower)
 
-  val mappings = Map(
+  val mappings = Map[Action, List[Char]](
     MoveW -> List('p', ''', '!', '.', '0', '3'),
     MoveE -> List('b', 'c', 'e', 'f', 'y', '2'),
     MoveSW -> List('a', 'g', 'h', 'i', 'j', '4'),
@@ -43,15 +43,5 @@ object Command {
 
   val all = List(MoveW, MoveE, MoveSW, MoveSE, RotateCW, RotateCCW)
 
-  def move(dir: String) = dir match {
-    case "W" => MoveW
-    case "E" => MoveE
-    case "SW" => MoveSW
-    case "SE" => MoveSE
-  }
-
-  def rotate(dir: String) = dir match {
-    case "CW" => RotateCW
-    case "CCW" => RotateCCW
-  }
+  def action(act: Action) = Command(mappings(act).head)
 }
