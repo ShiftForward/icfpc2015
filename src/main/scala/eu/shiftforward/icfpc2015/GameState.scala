@@ -63,9 +63,9 @@ case class GameState(
     if (moves.isEmpty) this
     else nextState(moves.head).nextState(moves.tail)
 
-  def gameOver = status != Running
+  lazy val gameOver = status != Running
 
-  def currentUnitPos = unitPosState.map(_.unitPos)
+  lazy val currentUnitPos = unitPosState.map(_.unitPos)
 }
 
 object GameState {
@@ -75,8 +75,7 @@ object GameState {
   case object Failed extends Status
 
   case class UnitPosState(unitPos: UnitPos, prevStates: Set[UnitPos] = Set()) {
-    def valid =
-      !prevStates.contains(unitPos)
+    lazy val valid = !prevStates.contains(unitPos)
 
     def update(newUnitPos: UnitPos) =
       UnitPosState(newUnitPos, prevStates + unitPos)
