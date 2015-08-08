@@ -133,11 +133,11 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
           // TODO this positions probably should take the bounding box and pivot into account
           col <- (state.grid.width until 0 by -1).toStream
           row <- (state.grid.height until cUnit.pos.row by -1).toStream
-          newCUnit = cUnit.copy(pos = Cell(col, row))
-          if GridOperations.fits(newCUnit, state.grid)
-          if newCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
-          if getLockCommand(state.grid, Some(newCUnit)).isDefined
-        } yield newCUnit
+          movedCUnit = cUnit.copy(pos = Cell(col, row))
+          rotatedCUnit <- Stream.iterate(movedCUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
+          if GridOperations.fits(rotatedCUnit, state.grid)
+          if rotatedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+        } yield rotatedCUnit
     }
   }
 }
