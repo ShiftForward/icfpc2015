@@ -106,15 +106,7 @@ class SmartSolver(a: Double = -3.0, b: Double = -1.0, c: Double = -1.0, d: Doubl
       Command('k'))
 
   def getLockCommand(grid: Grid, unitPos: Option[UnitPos]) = unitPos.flatMap { pos =>
-    commandsToTest
-      .toStream
-      .flatMap { comm =>
-        GridOperations.transform(pos, comm, grid) match {
-          case None => Some(comm)
-          case Some(_) => None
-        }
-      }.headOption
-
+    commandsToTest.find { comm => GridOperations.transform(pos, comm, grid).isEmpty }
   }
 
   def findPath(state: GameState, dst: UnitPos): Option[List[Command]] = {
