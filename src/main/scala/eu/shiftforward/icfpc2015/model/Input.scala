@@ -18,17 +18,21 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     (cell.x + dir.x, cell.y + dir.y)
   }
 
-  lazy val aggHeight: Int = {
-    val highestRow = (0 until height).indexWhere(idx => row(idx).exists(identity))
-    if (highestRow < 0) 0 else height - highestRow
+  lazy val heights: Seq[Int] = (0 until width).map { c =>
+    val h = column(c).indexWhere(identity)
+    if (h < 0) 0 else height - h
+  }
+
+  lazy val (aggHeight, bumpiness) = {
+    val loopResults = heights.tail.foldLeft((heights.head, 0, heights.head)) {
+      case ((maxHeight, bump, oldHeight), newHeight) =>
+        (math.max(newHeight, maxHeight), bump + math.abs(newHeight - oldHeight), newHeight)
+    }
+    (loopResults._1, loopResults._2)
   }
 
   lazy val fullLines: Int = (0 until height).count { r => row(r).forall(identity) }
   lazy val holes: Int = (0 until width).map { c => column(c).dropWhile(p => !p).count(p => !p) }.sum
-  lazy val bumpiness: Int = {
-    val heights = (0 until width).map { c => val h = column(c).indexWhere(identity); if (h < 0) height else h }
-    heights.zip(heights.drop(1)).map { case (s, d) => math.abs(d - s) }.sum
-  }
 
   def row(r: Int): Array[Boolean] = grid(r)
   def column(c: Int): Array[Boolean] = grid.map(_(c))
