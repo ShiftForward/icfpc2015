@@ -28,7 +28,7 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
     val firstHeight = colHeight(0)
     val firstHoles = (1 to firstHeight).count { h => !grid(height - h)(0) }
-    val firstFilledLines = column(0).zipWithIndex.filter(_._1).map(_._2)
+    val firstFilledLines = ((height - firstHeight) until height).filter { row => grid(row)(0) }
     var col = 1
     var maxHeight = firstHeight
     var minHeight = firstHeight
