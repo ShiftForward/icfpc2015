@@ -15,15 +15,8 @@ trait Solver {
  */
 object NaivePowerPhrasesSolver extends Solver {
 
-  // right now this is only for documentation
-  val knownWords = List(
-    "Ei!", // from statement
-    "Ia! Ia!", // from problem 3 grid
-    "R'lyeh", // from problem 5 grid
-    "Yuggoth") // from problem 7 grid
-
   def play(initialState: GameState) = {
-    val wordsIter = Iterator.continually(knownWords).flatten.map(_.toList)
+    val wordsIter = Iterator.continually(PowerPhrase.knownPhrases).flatten.map(_.toList)
 
     def fillUntilGameOver(state: GameState,
                           nextCommands: List[Char],

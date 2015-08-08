@@ -8,6 +8,13 @@ case class PowerPhrase(text: List[Char]) {
 }
 
 object PowerPhrase {
+
+  val knownPhrases = List(
+    "Ei!", // from statement
+    "Ia! Ia!", // from problem 3 grid
+    "R'lyeh", // from problem 5 grid
+    "Yuggoth") // from problem 7 grid
+
   def getMatchings(source: List[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
     var matching = List[(Int, PowerPhrase)]()
