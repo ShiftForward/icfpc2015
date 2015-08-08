@@ -21,12 +21,8 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   }
 
   def colHeight(c: Int) = {
-    val h = column(c).indexWhere(identity)
+    val h = grid.indexWhere(_(c))
     if (h < 0) 0 else height - h
-  }
-
-  def colHoles(c: Int) = {
-    column(c).dropWhile(p => !p).count(p => !p)
   }
 
   lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
