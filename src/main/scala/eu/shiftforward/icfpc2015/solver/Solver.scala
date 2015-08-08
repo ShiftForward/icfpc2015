@@ -105,17 +105,11 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
     else NaivePowerPhrasesSolver.play(initialState)
   }
 
-  val commandsToTest =
-    Seq(
-      Command('p'),
-      Command('b'),
-      Command('a'),
-      Command('l'),
-      Command('d'),
-      Command('k'))
+  val lockCommandCandidates =
+    Seq(MoveW, MoveE, MoveSW, MoveSE, RotateCW, RotateCCW).map(Command.action)
 
   def getLockCommand(grid: Grid, unitPos: Option[UnitPos]) = unitPos.flatMap { pos =>
-    commandsToTest.find { comm => GridOperations.transform(pos, comm, grid).isEmpty }
+    lockCommandCandidates.find { comm => GridOperations.transform(pos, comm, grid).isEmpty }
   }
 
   def possibleTargets(state: GameState): Stream[UnitPos] = {
