@@ -6,7 +6,7 @@ import eu.shiftforward.icfpc2015.model._
 import eu.shiftforward.icfpc2015.solver._
 import spray.json._
 
-import scala.io.Source
+import scala.io.{ StdIn, Source }
 import scala.util.Try
 
 object Interactive extends App {
@@ -22,7 +22,7 @@ object Interactive extends App {
     println(GameStateRenderer.stateAsString(state))
 
     if (state.gameOver) println("GAME OVER")
-    else readLine("> ") match {
+    else StdIn.readLine("> ") match {
       case ":q" => // Quit
 
       case str if str.startsWith(":skip") =>

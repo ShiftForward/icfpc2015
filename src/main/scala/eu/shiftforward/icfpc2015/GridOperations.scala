@@ -80,6 +80,10 @@ object GridOperations {
         if (parity) dx1 -= 1 else dx2 -= 1; dy += 1; parity = !parity
       case MoveSE =>
         if (parity) dx2 += 1 else dx1 += 1; dy += 1; parity = !parity
+      case MoveNW =>
+        if (parity) dx1 -= 1 else dx2 -= 1; dy -= 1; parity = !parity
+      case MoveNE =>
+        if (parity) dx2 += 1 else dx1 += 1; dy -= 1; parity = !parity
       case RotateCW => dr = (dr + 1) % 6
       case RotateCCW => dr = (dr + 6 - 1) % 6
     }
