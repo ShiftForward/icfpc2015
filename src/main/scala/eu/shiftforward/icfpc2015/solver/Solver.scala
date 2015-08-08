@@ -45,15 +45,8 @@ object NaivePowerPhrasesSolver extends Solver {
   }
 }
 
-final case class HyperParameters(a: Double = 0.8729920392163335,
-                                 b: Double = 0.20182564826293325,
-                                 c: Double = 0.9400811696297673,
-                                 d: Double = 0.3790167174127723,
-                                 e: Double = -0.34908895269497164,
-                                 f: Double = 0.16749221845450513)
-
 // TODO naming!
-class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Boolean = true) extends Solver {
+class SmartSolver(hp: Array[Double] = List(0.68, 0.13, 0.15, -0.17, 0.18, 0.78).toArray, debugOnGameOver: Boolean = true) extends Solver {
 
   /**
    * The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
@@ -194,12 +187,12 @@ class SmartSolver(hp: HyperParameters = HyperParameters(), debugOnGameOver: Bool
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
   def cost(grid: Grid): Double =
-    hp.a * grid.aggHeight +
-      hp.b * grid.bumpiness +
-      hp.c * grid.holes +
-      hp.d * grid.fullLines +
-      hp.e * grid.aggLow +
-      hp.f * grid.highLow
+    hp(0) * grid.aggHeight +
+      hp(1) * grid.bumpiness +
+      hp(2) * grid.holes +
+      hp(3) * grid.fullLines +
+      hp(4) * grid.aggLow +
+      hp(5) * grid.highLow
 
   /**
    * Returns a command that locks the current unit in place.
