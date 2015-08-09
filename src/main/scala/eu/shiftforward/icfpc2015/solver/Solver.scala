@@ -75,6 +75,8 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     val unusedPowerPhrases = mutable.HashSet(powerPhrases: _*)
     val usedPowerPhrases = mutable.HashSet.empty[PowerPhrase]
 
+    val numUnits = initialState.units.size
+
     // when the time comes to try power phrases, we prefer unused phrases as they are worth more points
     def allPowerPhrases = unusedPowerPhrases.toIterator ++ usedPowerPhrases.toIterator
 
@@ -103,7 +105,7 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
               val unorderedCandidates = possibleTargets(state)
 
               // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-              val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*), state.units.size) }
+              val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*), numUnits - state.placedUnits) }
               // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
               val candidates =
                 if (unorderedCandidates.isEmpty) Stream.empty
