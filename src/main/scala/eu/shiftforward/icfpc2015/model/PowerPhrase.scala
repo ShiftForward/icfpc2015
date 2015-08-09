@@ -15,7 +15,8 @@ object PowerPhrase {
     PowerPhrase("Ia! Ia!"), // from problem 3 grid
     PowerPhrase("R'lyeh"), // from problem 5 grid
     PowerPhrase("Yuggoth"), // from problem 7 grid
-    PowerPhrase("Tsathoggua")) // https://twitter.com/ICFPContest2015/status/630300070236139520
+    PowerPhrase("Tsathoggua"), // https://twitter.com/ICFPContest2015/status/630300070236139520
+    PowerPhrase("yoyodyne")) // https://en.wikipedia.org/wiki/The_Adventures_of_Buckaroo_Banzai_Across_the_8th_Dimension
 
   def getMatchings(source: Seq[Command], powerphrases: Seq[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 

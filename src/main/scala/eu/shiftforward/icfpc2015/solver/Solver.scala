@@ -78,7 +78,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
     // when the time comes to try power phrases, we prefer unused phrases as they are worth more points
     def allPowerPhrases = unusedPowerPhrases.toIterator ++ usedPowerPhrases.toIterator
 
-    def playAux(state: GameState, addLock: Boolean = false): Seq[Command] = state.status match {
+    def playAux(state: GameState): Seq[Command] = state.status match {
 
       case GameState.GameOver =>
         if (debugOnGameOver) {
@@ -92,98 +92,84 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
           state.commandHistory.mkString)
 
       case GameState.Running =>
-        lazy val lockCommand = getLockCommand(state.grid, state.currentUnitPos)
-        if (addLock && lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
-        else if (addLock) {
-          println(GameStateRenderer.stateAsString(state))
-          println(state.unitPosState)
-          throw new RuntimeException("Expecting to lock but could to sherlock...")
-        } else {
-          val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
+        val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
 
-          // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-          val candidates = possibleTargets(state).sortBy { newUnitPos =>
-            // val candidates = Utils.insertionSortBy(possibleTargets(state), { newUnitPos: UnitPos =>
-            val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-            cost(newGrid)
-          } //)
+        // retrieve all possible final destinations for the current unit
+        val unorderedCandidates = possibleTargets(state)
 
-          // filter out the candidates without a valid path to there, keep both the destination and the path found
-          val validCandidates = candidates.flatMap { dest =>
-            pathFinder.pathTo(dest).map { path => (dest, path) }
-          }
+        // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
+        val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*)) }
+        // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
+        val candidates = unorderedCandidates.minBy(candidateCostFunc) #::
+          unorderedCandidates.sortBy(candidateCostFunc).tail
 
-          // select the best valid candidate - the final destination of the unit, `dest`, will not change anymore after
-          // this
-          validCandidates.headOption match {
-            case Some((dest, path)) =>
-              val revPathFinder = new ReversePathFinder(state.grid, dest)
-              // println(s"dest = $dest")
+        // filter out the candidates without a valid path to there, keep both the destination and the path found
+        val validCandidates = candidates.flatMap { dest =>
+          pathFinder.pathTo(dest).map { path => (dest, path) }
+        }
 
-              // between the unit's initial position and its destination, try to use as many power phrases as possible
-              def optimizeForPower(currState: GameState,
-                                   currentPath: Seq[Command],
-                                   powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
-                if (powerPhrasesToTry.isEmpty) {
-                  // if there are no more power words to try, stop optimizing and execute the previously calculated
-                  // shortest path
-                  currState.nextState(PowerPhrase.getBestString(currentPath, currState.powerPhrases))
-                } else {
-                  // obtain the next power phrase to try
-                  val powerPhrase = powerPhrasesToTry.next()
-                  val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
+        // select the best valid candidate - the final destination of the unit, `dest`, will not change anymore after
+        // this
+        validCandidates.headOption match {
+          case Some((dest, path)) =>
+            val revPathFinder = new ReversePathFinder(state.grid, dest)
+            // println(s"dest = $dest")
 
-                  // obtain the position the unit will be after the power phrase (possibly out of the grid)
-                  val unitPosAfterPower = GridOperations.transformUnitPos(
-                    currState.unitPosState.get.unitPos, powerTransform)
+            // between the unit's initial position and its destination, try to use as many power phrases as possible
+            def optimizeForPower(currState: GameState,
+                                 currentPath: Seq[Command],
+                                 powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
+              if (powerPhrasesToTry.isEmpty) {
+                // if there are no more power words to try, stop optimizing and execute the previously calculated
+                // shortest path
+                currState.nextState(PowerPhrase.getBestString(currentPath, currState.powerPhrases))
+              } else {
+                // obtain the next power phrase to try
+                val powerPhrase = powerPhrasesToTry.next()
+                val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
 
-                  // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
+                // obtain the position the unit will be after the power phrase (possibly out of the grid)
+                val unitPosAfterPower = GridOperations.transformUnitPos(
+                  currState.unitPosState.get.unitPos, powerTransform)
 
-                  // find a path from that position to the destination
-                  revPathFinder.pathFrom(unitPosAfterPower) match {
-                    // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
-                    case Some(pathAfterPower) =>
-                      // if there is a path, obtain the game state after applying the power commands
-                      val newState = currState.nextState(powerCommands)
+                // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
 
-                      // the previously calculated position does not take in account locked cells during the power
-                      // phrase commands, only the final position. Test here if the game entered a non-running state or
-                      // the unit we're dealing with was locked
-                      if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
-                        // if something happened, try the next power phrase
-                        optimizeForPower(currState, currentPath, powerPhrasesToTry)
-                      } else {
-                        // else, record usage of power phrase and continue optimizing from the new state
-                        unusedPowerPhrases -= powerPhrase
-                        usedPowerPhrases += powerPhrase
-                        optimizeForPower(newState, pathAfterPower, allPowerPhrases)
-                      }
+                // find a path from that position to the destination
+                revPathFinder.pathFrom(unitPosAfterPower) match {
+                  // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                  case Some(pathAfterPower) =>
+                    // if there is a path, obtain the game state after applying the power commands
+                    val newState = currState.nextState(powerCommands)
 
-                    case None =>
-                      // if there is not any path, try the next power phrase
+                    // the previously calculated position does not take in account locked cells during the power
+                    // phrase commands, only the final position. Test here if the game entered a non-running state or
+                    // the unit we're dealing with was locked
+                    if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
+                      // if something happened, try the next power phrase
                       optimizeForPower(currState, currentPath, powerPhrasesToTry)
-                  }
+                    } else {
+                      // else, record usage of power phrase and continue optimizing from the new state
+                      unusedPowerPhrases -= powerPhrase
+                      usedPowerPhrases += powerPhrase
+                      optimizeForPower(newState, pathAfterPower, allPowerPhrases)
+                    }
+
+                  case None =>
+                    // if there is not any path, try the next power phrase
+                    optimizeForPower(currState, currentPath, powerPhrasesToTry)
                 }
               }
+            }
+            playAux(lockUnit(optimizeForPower(state, path, allPowerPhrases)))
 
-              playAux(optimizeForPower(state, path, allPowerPhrases), addLock = true)
-
-            case None =>
-              if (lockCommand.isDefined) playAux(state.nextState(lockCommand.get))
-              else {
-                println("SmartSolver could not reach game over!\nCommand History:" +
-                  state.commandHistory.mkString)
-                state.commandHistory
-              }
-          }
+          case None =>
+            // the unit has nowhere to go, we lock it and continue
+            playAux(lockUnit(state))
         }
     }
 
+    // play! :)
     playAux(initialState)
-
-    // this is here so that problem 14 terminates
-    // if (initialState.grid.width <= 25) playAux(initialState)
-    // else NaivePowerPhrasesSolver.play(initialState)
   }
 
   /**
@@ -206,6 +192,15 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
     lockCommandCandidates.find { comm => GridOperations.transform(pos, comm, grid).isEmpty }
   }
 
+  def lockUnit(state: GameState): GameState = {
+    getLockCommand(state.grid, state.currentUnitPos) match {
+      case Some(cmd) => state.nextState(cmd)
+      case None =>
+        throw new Exception("Expecting to lock but could to sherlock...\nCommand History:" +
+          state.commandHistory.mkString)
+    }
+  }
+
   /**
    * Returns a stream of valid destinations for the current unit. The returned stream is not ordered by grid cost.
    */
@@ -214,14 +209,18 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
       case None => Stream.empty
       case Some(cUnit) =>
         for {
-          // TODO this positions probably should take the bounding box and pivot into account
-          col <- (state.grid.width - 1 to 0 by -1).toStream
-          row <- (state.grid.height - 1 to cUnit.pos.row by -1).toStream
-          movedCUnit = cUnit.copy(pos = Cell(col, row))
-          rotatedCUnit <- Stream.iterate(movedCUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
-          if GridOperations.fits(rotatedCUnit, state.grid)
-          if rotatedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
-        } yield rotatedCUnit
+          rotatedCUnit <- Stream.iterate(cUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
+          (Cell(leftCell, topCell), Cell(rightCell, bottomCell)) = rotatedCUnit.unit.boundingBox
+          left = 0 - (leftCell - rotatedCUnit.unit.pivot.col)
+          right = state.grid.width - 1 - (rightCell - rotatedCUnit.unit.pivot.col)
+          top = cUnit.pos.row
+          bottom = state.grid.height - 1 - (bottomCell - rotatedCUnit.unit.pivot.row)
+          col <- (right to left by -1).toStream
+          row <- (bottom to top by -1).toStream
+          movedCUnit = rotatedCUnit.copy(pos = Cell(col, row))
+          if GridOperations.fits(movedCUnit, state.grid)
+          if movedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+        } yield movedCUnit
     }
   }
 }
