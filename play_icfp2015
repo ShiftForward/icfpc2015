@@ -1,2 +1,17 @@
 #!/bin/bash
-java -jar ./target/scala-2.11/icfpc2015-assembly-0.1-SNAPSHOT.jar $@
+
+JVM_ARGS=""
+APP_ARGS=""
+
+while [[ $# > 1 ]]; do
+  key="$1"
+  value="$2"
+
+  case $key in
+    -m) JVM_ARGS="$JVM_ARGS -Xms${value}M -Xmx${value}M";;
+    *) APP_ARGS="$APP_ARGS $key $value";;
+  esac
+  shift; shift
+done
+
+exec java $JVM_ARGS -jar target/scala-2.11/icfpc2015-assembly-0.1-SNAPSHOT.jar $APP_ARGS
