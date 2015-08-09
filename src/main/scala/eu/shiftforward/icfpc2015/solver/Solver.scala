@@ -21,7 +21,7 @@ case class PowerPhraseDiscoverySolver(powerPhrase: String) extends Solver {
 object NaivePowerPhrasesSolver extends Solver {
 
   def play(initialState: GameState) = {
-    val wordsIter = Iterator.continually(PowerPhrase.knownPhrases).flatten.map(_.text)
+    val wordsIter = Iterator.continually(initialState.powerPhrases).flatten.map(_.text)
 
     def fillUntilGameOver(state: GameState,
                           nextCommands: List[Char],
@@ -53,27 +53,23 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
   }
 
   /**
-   * The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
-   * improve performance or it can even be set to `Nil` to disable power phrase optimization.
-   */
-  val powerPhrases = PowerPhrase.knownPhrases
-
-  /**
-   * A map from power phrases to their list of respective commands and its compiled transformation.
-   */
-  private[this] val powerPhraseIndex = powerPhrases.map { phrase =>
-    val commands = phrase.movements :+ Command.action(MoveSE) // MoveSE in order to force valid paths
-    val transform = GridOperations.compileTransform(commands.map(_.action))
-    phrase -> (commands, transform)
-  }.toMap
-
-  /**
    * The list of commands to test when an unit is to be locked in place.
    */
   private[this] val lockCommandCandidates =
     Seq(MoveW, MoveE, MoveSW, MoveSE, RotateCW, RotateCCW).map(Command.action)
 
   def play(initialState: GameState): Seq[Command] = {
+
+    // The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
+    // improve performance or it can even be set to `Nil` to disable power phrase optimization
+    val powerPhrases = initialState.powerPhrases
+
+    // A map from power phrases to their list of respective commands and its compiled transformation
+    val powerPhraseIndex = powerPhrases.map { phrase =>
+      val commands = phrase.movements :+ Command.action(MoveSE) // MoveSE in order to force valid paths
+      val transform = GridOperations.compileTransform(commands.map(_.action))
+      phrase -> (commands, transform)
+    }.toMap
 
     // for each game, we keep track of the power phrases we already used
     val unusedPowerPhrases = mutable.HashSet(powerPhrases: _*)
@@ -127,14 +123,14 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
               // between the unit's initial position and its destination, try to use as many power phrases as possible
               def optimizeForPower(currState: GameState,
                                    currentPath: Seq[Command],
-                                   powerPhrases: Iterator[PowerPhrase]): GameState = {
-                if (powerPhrases.isEmpty) {
+                                   powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
+                if (powerPhrasesToTry.isEmpty) {
                   // if there are no more power words to try, stop optimizing and execute the previously calculated
                   // shortest path
-                  currState.nextState(PowerPhrase.getBestString(currentPath, this.powerPhrases))
+                  currState.nextState(PowerPhrase.getBestString(currentPath, currState.powerPhrases))
                 } else {
                   // obtain the next power phrase to try
-                  val powerPhrase = powerPhrases.next()
+                  val powerPhrase = powerPhrasesToTry.next()
                   val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
 
                   // obtain the position the unit will be after the power phrase (possibly out of the grid)
@@ -145,7 +141,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
 
                   // find a path from that position to the destination
                   revPathFinder.pathFrom(unitPosAfterPower) match {
-                    //new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                  // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
                     case Some(pathAfterPower) =>
                       // if there is a path, obtain the game state after applying the power commands
                       val newState = currState.nextState(powerCommands)
@@ -155,7 +151,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
                       // the unit we're dealing with was locked
                       if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
                         // if something happened, try the next power phrase
-                        optimizeForPower(currState, currentPath, powerPhrases)
+                        optimizeForPower(currState, currentPath, powerPhrasesToTry)
                       } else {
                         // else, record usage of power phrase and continue optimizing from the new state
                         unusedPowerPhrases -= powerPhrase
@@ -165,7 +161,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
 
                     case None =>
                       // if there is not any path, try the next power phrase
-                      optimizeForPower(currState, currentPath, powerPhrases)
+                      optimizeForPower(currState, currentPath, powerPhrasesToTry)
                   }
                 }
               }
@@ -186,8 +182,8 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
     playAux(initialState)
 
     // this is here so that problem 14 terminates
-    //if (initialState.grid.width <= 25) playAux(initialState)
-    //else NaivePowerPhrasesSolver.play(initialState)
+    // if (initialState.grid.width <= 25) playAux(initialState)
+    // else NaivePowerPhrasesSolver.play(initialState)
   }
 
   /**

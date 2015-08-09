@@ -19,11 +19,13 @@ object SolverDebugger extends App {
   input.sourceSeeds.map { seed =>
     val units = input.orderedUnitsBySeed(seed)
     val grid = Grid(input.width, input.height).filled(input.filled: _*)
-    val solution = solver.play(GameState(grid, units)).toList
+    val powerPhrases = PowerPhrase.knownPhrases
+
+    val solution = solver.play(GameState(grid, units, powerPhrases)).toList
 
     println(s"Solution with seed $seed: ${solution.map(_.ch).mkString}")
 
-    Output(input.id, seed, solutionTag, solver.play(GameState(grid, units)).toList)
+    Output(input.id, seed, solutionTag, solver.play(GameState(grid, units, powerPhrases)).toList)
   }
 
   val endTime = System.currentTimeMillis()

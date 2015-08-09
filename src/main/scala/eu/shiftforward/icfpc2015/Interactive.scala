@@ -1,7 +1,5 @@
 package eu.shiftforward.icfpc2015
 
-import java.io._
-
 import eu.shiftforward.icfpc2015.GameState.UnitPosState
 import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
@@ -13,11 +11,11 @@ import scala.util.Try
 
 object Interactive extends App {
   val input = Source.fromFile(args(0)).mkString.parseJson.convertTo[Input]
-  val seedIndex = if (args.size > 1) args(1).toInt else 0
-
-  val units = input.orderedUnitsBySeed(input.sourceSeeds(seedIndex))
+  val seedIndex = if (args.length > 1) args(1).toInt else 0
 
   val grid = Grid(input.width, input.height).filled(input.filled: _*)
+  val units = input.orderedUnitsBySeed(input.sourceSeeds(seedIndex))
+  val powerPhrases = PowerPhrase.knownPhrases
 
   val smartSolver = new SmartSolver // TODO refactor this
 
@@ -113,5 +111,5 @@ object Interactive extends App {
       loop(state)
   }
 
-  loop(GameState(grid, units))
+  loop(GameState(grid, units, powerPhrases))
 }
