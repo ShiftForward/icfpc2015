@@ -5,11 +5,11 @@ import eu.shiftforward.icfpc2015.model._
 import scala.collection.mutable
 
 trait Solver {
-  def play(initialState: GameState): Seq[Command]
+  def play(initialState: GameState, timeLimit: Option[Int] = None): Seq[Command]
 }
 
 case class PowerPhraseDiscoverySolver(powerPhrase: String) extends Solver {
-  def play(initialState: GameState) = {
+  def play(initialState: GameState, timeLimit: Option[Int] = None) = {
     initialState.nextState(powerPhrase).status match {
       case GameState.Failed =>
         throw new Exception("This problem cannot be used to test the specified phrase of power!")
@@ -20,7 +20,7 @@ case class PowerPhraseDiscoverySolver(powerPhrase: String) extends Solver {
 
 object NaivePowerPhrasesSolver extends Solver {
 
-  def play(initialState: GameState) = {
+  def play(initialState: GameState, timeLimit: Option[Int] = None) = {
     val wordsIter = Iterator.continually(initialState.powerPhrases).flatten.map(_.text)
 
     def fillUntilGameOver(state: GameState,
@@ -53,7 +53,12 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
   private[this] val lockCommandCandidates =
     Seq(MoveW, MoveE, MoveSW, MoveSE, RotateCW, RotateCCW).map(Command.action)
 
-  def play(initialState: GameState): Seq[Command] = {
+  def play(initialState: GameState, timeLimit: Option[Int] = None): Seq[Command] = {
+
+    val safeTimeLimitMillis = timeLimit.map(_ * 1000 - 1000) // minus 1s to return and calculate PowerPhrase.getBestString
+    val startTimeMillis = System.currentTimeMillis()
+
+    def elapsedTime() = System.currentTimeMillis() - startTimeMillis
 
     // The power phrases to optimize commands for. This value can be set to a subset of the known phrases in order to
     // improve performance or it can even be set to `Nil` to disable power phrase optimization
@@ -73,95 +78,102 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     // when the time comes to try power phrases, we prefer unused phrases as they are worth more points
     def allPowerPhrases = unusedPowerPhrases.toIterator ++ usedPowerPhrases.toIterator
 
-    def playAux(state: GameState): Seq[Command] = state.status match {
+    def playAux(state: GameState): Seq[Command] = {
+      safeTimeLimitMillis.map(elapsedTime > _) match {
+        case Some(true) => // no time left
+          state.commandHistory
+        case _ =>
+          state.status match {
 
-      case GameState.GameOver =>
-        if (debugOnGameOver) {
-          println("GAME OVER")
-          println(GameStateRenderer.stateAsString(state))
-        }
-        state.commandHistory
-
-      case GameState.Failed =>
-        throw new Exception("SmartSolver led to a failure state!\nCommand History:" +
-          state.commandHistory.mkString)
-
-      case GameState.Running =>
-        val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
-
-        // retrieve all possible final destinations for the current unit
-        val unorderedCandidates = possibleTargets(state)
-
-        // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-        val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*), state.units.size) }
-        // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
-        val candidates =
-          if (unorderedCandidates.isEmpty) Stream.empty
-          else unorderedCandidates.minBy(candidateCostFunc) #:: unorderedCandidates.sortBy(candidateCostFunc).tail
-
-        // filter out the candidates without a valid path to there, keep both the destination and the path found
-        val validCandidates = candidates.flatMap { dest =>
-          pathFinder.pathTo(dest).map { path => (dest, path) }
-        }
-
-        // select the best valid candidate - the final destination of the unit, `dest`, will not change anymore after
-        // this
-        validCandidates.headOption match {
-          case Some((dest, path)) =>
-            val revPathFinder = new ReversePathFinder(state.grid, dest)
-            // println(s"dest = $dest")
-
-            // between the unit's initial position and its destination, try to use as many power phrases as possible
-            def optimizeForPower(currState: GameState,
-                                 currentPath: Seq[Command],
-                                 powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
-              if (powerPhrasesToTry.isEmpty) {
-                // if there are no more power words to try, stop optimizing and execute the previously calculated
-                // shortest path
-                currState.nextState(currentPath)
-              } else {
-                // obtain the next power phrase to try
-                val powerPhrase = powerPhrasesToTry.next()
-                val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
-
-                // obtain the position the unit will be after the power phrase (possibly out of the grid)
-                val unitPosAfterPower = GridOperations.transformUnitPos(
-                  currState.unitPosState.get.unitPos, powerTransform)
-
-                // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
-
-                // find a path from that position to the destination
-                revPathFinder.pathFrom(unitPosAfterPower) match {
-                  // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
-                  case Some(pathAfterPower) =>
-                    // if there is a path, obtain the game state after applying the power commands
-                    val newState = currState.nextState(powerCommands)
-
-                    // the previously calculated position does not take in account locked cells during the power
-                    // phrase commands, only the final position. Test here if the game entered a non-running state or
-                    // the unit we're dealing with was locked
-                    if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
-                      // if something happened, try the next power phrase
-                      optimizeForPower(currState, currentPath, powerPhrasesToTry)
-                    } else {
-                      // else, record usage of power phrase and continue optimizing from the new state
-                      unusedPowerPhrases -= powerPhrase
-                      usedPowerPhrases += powerPhrase
-                      optimizeForPower(newState, pathAfterPower, allPowerPhrases)
-                    }
-
-                  case None =>
-                    // if there is not any path, try the next power phrase
-                    optimizeForPower(currState, currentPath, powerPhrasesToTry)
-                }
+            case GameState.GameOver =>
+              if (debugOnGameOver) {
+                println("GAME OVER")
+                println(GameStateRenderer.stateAsString(state))
               }
-            }
-            playAux(lockUnit(optimizeForPower(state, path, allPowerPhrases)))
+              state.commandHistory
 
-          case None =>
-            // the unit has nowhere to go, we lock it and continue
-            playAux(lockUnit(state))
-        }
+            case GameState.Failed =>
+              throw new Exception("SmartSolver led to a failure state!\nCommand History:" +
+                state.commandHistory.mkString)
+
+            case GameState.Running =>
+              val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
+
+              // retrieve all possible final destinations for the current unit
+              val unorderedCandidates = possibleTargets(state)
+
+              // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
+              val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*), state.units.size) }
+              // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
+              val candidates =
+                if (unorderedCandidates.isEmpty) Stream.empty
+                else unorderedCandidates.minBy(candidateCostFunc) #:: unorderedCandidates.sortBy(candidateCostFunc).tail
+
+              // filter out the candidates without a valid path to there, keep both the destination and the path found
+              val validCandidates = candidates.flatMap { dest =>
+                pathFinder.pathTo(dest).map { path => (dest, path) }
+              }
+
+              // select the best valid candidate - the final destination of the unit, `dest`, will not change anymore after
+              // this
+              validCandidates.headOption match {
+                case Some((dest, path)) =>
+                  val revPathFinder = new ReversePathFinder(state.grid, dest)
+                  // println(s"dest = $dest")
+
+                  // between the unit's initial position and its destination, try to use as many power phrases as possible
+                  def optimizeForPower(currState: GameState,
+                                       currentPath: Seq[Command],
+                                       powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
+                    if (powerPhrasesToTry.isEmpty) {
+                      // if there are no more power words to try, stop optimizing and execute the previously calculated
+                      // shortest path
+                      currState.nextState(currentPath)
+                    } else {
+                      // obtain the next power phrase to try
+                      val powerPhrase = powerPhrasesToTry.next()
+                      val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
+
+                      // obtain the position the unit will be after the power phrase (possibly out of the grid)
+                      val unitPosAfterPower = GridOperations.transformUnitPos(
+                        currState.unitPosState.get.unitPos, powerTransform)
+
+                      // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
+
+                      // find a path from that position to the destination
+                      revPathFinder.pathFrom(unitPosAfterPower) match {
+                        // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                        case Some(pathAfterPower) =>
+                          // if there is a path, obtain the game state after applying the power commands
+                          val newState = currState.nextState(powerCommands)
+
+                          // the previously calculated position does not take in account locked cells during the power
+                          // phrase commands, only the final position. Test here if the game entered a non-running state or
+                          // the unit we're dealing with was locked
+                          if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
+                            // if something happened, try the next power phrase
+                            optimizeForPower(currState, currentPath, powerPhrasesToTry)
+                          } else {
+                            // else, record usage of power phrase and continue optimizing from the new state
+                            unusedPowerPhrases -= powerPhrase
+                            usedPowerPhrases += powerPhrase
+                            optimizeForPower(newState, pathAfterPower, allPowerPhrases)
+                          }
+
+                        case None =>
+                          // if there is not any path, try the next power phrase
+                          optimizeForPower(currState, currentPath, powerPhrasesToTry)
+                      }
+                    }
+                  }
+                  playAux(lockUnit(optimizeForPower(state, path, allPowerPhrases)))
+
+                case None =>
+                  // the unit has nowhere to go, we lock it and continue
+                  playAux(lockUnit(state))
+              }
+          }
+      }
     }
 
     // play! :)
