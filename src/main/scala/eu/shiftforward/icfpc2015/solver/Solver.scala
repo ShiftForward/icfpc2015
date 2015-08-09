@@ -108,10 +108,11 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
           val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
 
           // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-          val candidates = possibleTargets(state).sortBy { newUnitPos =>
+          //val candidates = possibleTargets(state).sortBy { newUnitPos =>
+          val candidates = Utils.insertionSortBy(possibleTargets(state), { newUnitPos: UnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
             cost(newGrid)
-          }
+          })
 
           // filter out the candidates without a valid path to there, keep both the destination and the path found
           val validCandidates = candidates.flatMap { dest =>
@@ -194,6 +195,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
   /**
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
+
   def cost(grid: Grid): Double = {
     (hp(36) + hp(0) * grid.aggHeight + hp(1) * grid.bumpiness + hp(2) * grid.holes + hp(3) * grid.fullLines + hp(4) * grid.aggLow + hp(5) * grid.highLow) * grid.aggHeight +
       (hp(37) + hp(6) * grid.aggHeight + hp(7) * grid.bumpiness + hp(8) * grid.holes + hp(9) * grid.fullLines + hp(10) * grid.aggLow + hp(11) * grid.highLow) * grid.bumpiness +
