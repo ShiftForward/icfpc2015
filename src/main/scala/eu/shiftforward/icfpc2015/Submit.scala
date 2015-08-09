@@ -10,7 +10,7 @@ import spray.json._
 import scala.io.Source
 
 object Submit extends App {
-  val solver: Solver = new SmartSolver()
+  val solver: Solver = new SmartSolver
   val solutionTag: Option[String] = None
 
   val cliDryRun = args.contains("--dryrun")
