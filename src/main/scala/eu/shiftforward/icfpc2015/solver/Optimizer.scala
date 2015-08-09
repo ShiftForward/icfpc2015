@@ -115,12 +115,14 @@ object GeneticOptimizer extends Optimizer {
         if (mutationRate > Random.nextFloat) geneMutator(gene) else gene))
   }
 
-  def optimize(filenames: Array[String], maxIter: Int, population: Int) = {
+  def optimize(filenames: Array[String], maxIter: Int) = {
     def fitness(s: Specimen): Long = {
       filenames.map { filename =>
         score(filename, s).score
       }.sum
     }
+
+    val population = 128
 
     val petri = new GeneticExploration(
       0.05, 0.5, population, // rate of mutation, crossover ratio, max population
@@ -175,5 +177,5 @@ object GeneticOptimizer extends Optimizer {
 }
 
 object OptimizerMain extends App {
-  println(GeneticOptimizer.optimize(args, 20, 128))
+  println(GeneticOptimizer.optimize(args, 20))
 }
