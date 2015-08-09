@@ -216,8 +216,8 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
           right = state.grid.width - 1 - (rightCell - rotatedCUnit.unit.pivot.col)
           top = cUnit.pos.row
           bottom = state.grid.height - 1 - (bottomCell - rotatedCUnit.unit.pivot.row)
-          col <- (right to left by -1).toStream
           row <- (bottom to top by -1).toStream
+          col <- (right to left by -1).toStream
           movedCUnit = rotatedCUnit.copy(pos = Cell(col, row))
           if GridOperations.fits(movedCUnit, state.grid)
           if movedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
