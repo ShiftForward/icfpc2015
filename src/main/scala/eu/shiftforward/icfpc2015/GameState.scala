@@ -11,7 +11,8 @@ case class GameState(
     unitPosState: Option[UnitPosState],
     status: Status,
     score: Score = Score(),
-    commandHistory: Vector[Command] = Vector()) {
+    commandHistory: Vector[Command] = Vector(),
+    placedUnits: Int = 0) {
 
   def nextState(move: Char): GameState = nextState(Command.char(move))
 
@@ -27,12 +28,12 @@ case class GameState(
           case h :: t =>
             initialPosition(h, nextGrid) match {
               case None =>
-                GameState(nextGrid, t, powerPhrases, None, GameOver, nextScore, nextCommandHistory)
+                GameState(nextGrid, t, powerPhrases, None, GameOver, nextScore, nextCommandHistory, placedUnits + 1)
               case Some(nextPos) =>
-                GameState(nextGrid, t, powerPhrases, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore, nextCommandHistory)
+                GameState(nextGrid, t, powerPhrases, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore, nextCommandHistory, placedUnits + 1)
             }
           case _ =>
-            GameState(nextGrid, units, powerPhrases, None, GameOver, nextScore, nextCommandHistory)
+            GameState(nextGrid, units, powerPhrases, None, GameOver, nextScore, nextCommandHistory, placedUnits + 1)
         }
       }
 
@@ -48,9 +49,9 @@ case class GameState(
               val updatedUnitState = prevState.update(nextPos)
               if (updatedUnitState.valid) {
                 val nextScore = score.updatePower(powerPhrasesScored)
-                GameState(grid, units, powerPhrases, Some(updatedUnitState), status, nextScore, nextCommandHistory)
+                GameState(grid, units, powerPhrases, Some(updatedUnitState), status, nextScore, nextCommandHistory, placedUnits)
               } else
-                GameState(grid, units, powerPhrases, None, Failed, Score(), nextCommandHistory)
+                GameState(grid, units, powerPhrases, None, Failed, Score(), nextCommandHistory, placedUnits)
           }
         case None =>
           println("We shouldn't have gotten here!")
