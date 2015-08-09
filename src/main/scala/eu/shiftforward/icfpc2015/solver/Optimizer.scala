@@ -10,7 +10,7 @@ import scala.util.Random
 case class OptimizationResult(score: Long, parameters: Array[Double])
 
 trait Optimizer {
-  val hyperparametersLenght = 36
+  val hyperparametersLenght = 42
 
   protected def score(filename: String, hp: Array[Double]) = {
     val input = Source.fromFile(filename).mkString.parseJson.convertTo[Input]
@@ -121,8 +121,8 @@ object GeneticOptimizer extends Optimizer {
     val petri = new GeneticExploration(
       0.05, 0.5, 64, // rate of mutation, crossover ratio, max population
       () => (Random.nextDouble() - 0.5) * 2, // random gene pool
-      g => g + (Random.nextDouble() - 0.5) / 5, // gene mutator
-      cs => cs.map(v => (math floor v * 100) / 100).toArray, // how to build a specimen from genes
+      _ => (Random.nextDouble() - 0.5) * 2, // gene mutator
+      cs => cs.map(v => (math rint v * 100) / 100).toArray, // how to build a specimen from genes
       cs => { val sum = cs.sum; cs.map(_ / sum) },
       fitness, // the fitness function
       (iter, _) => iter > 20 // the stop condition
