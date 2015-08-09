@@ -48,8 +48,15 @@ object NaivePowerPhrasesSolver extends Solver {
 // TODO naming!
 class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends Solver {
   def this() {
-    this(Array[Double](
-      0.21, 0.74, 0.96, 0.72, -0.8, 0.19, 0.7, 0.69, 0.61, 0.17, 0.08, -0.9, 0.87, -0.49, -0.64, -0.84, 0.74, 0.57, 0.52, -0.51, -0.26, -0.85, -0.24, 0.45, 0.49, -0.46, 0.54, 0.92, -0.06, -0.75, 0.64, 0.66, 0.59, 0.79, -0.15, 0.88, -0.23, 0.01, 0.04, -0.59, -0.19, -0.49))
+    this(Array(
+      0.02, 0.13, -0.87, -0.95, 0.44, 0.15,
+      -0.85, 0.67, 0.38, -0.18, -0.09, 0.54,
+      0.2, 0.33, -0.43, 0.95, 0.16, 0.87,
+      0.61, 0.22, 0.73, -0.68, -0.7, 0.27,
+      -0.28, 0.4, -0.73, 0.39, -0.88, -0.48,
+      0.81, -0.02, 0.47, -0.99, -0.09, 0.03,
+      -0.93, -0.8, 0.48, -0.21, -0.15, 0.41,
+      0, 0, 0, 0, 0, 0))
   }
 
   /**
@@ -98,7 +105,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
         val unorderedCandidates = possibleTargets(state)
 
         // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-        val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*)) }
+        val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*), state.units.size) }
         // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
         val candidates =
           if (unorderedCandidates.isEmpty) Stream.empty
@@ -173,17 +180,15 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
     playAux(initialState)
   }
 
+  val hpMatrix = hp.toList.sliding(6, 6).map(_.toArray).toArray
+  private[this] def dot(x: Array[Double], y: Array[Double]) = x.zip(y).map { case (a, b) => a * b }.sum
   /**
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
-
-  def cost(grid: Grid): Double = {
-    (hp(36) + hp(0) * grid.aggHeight + hp(1) * grid.bumpiness + hp(2) * grid.holes + hp(3) * grid.fullLines + hp(4) * grid.aggLow + hp(5) * grid.highLow) * grid.aggHeight +
-      (hp(37) + hp(6) * grid.aggHeight + hp(7) * grid.bumpiness + hp(8) * grid.holes + hp(9) * grid.fullLines + hp(10) * grid.aggLow + hp(11) * grid.highLow) * grid.bumpiness +
-      (hp(38) + hp(12) * grid.aggHeight + hp(13) * grid.bumpiness + hp(14) * grid.holes + hp(15) * grid.fullLines + hp(16) * grid.aggLow + hp(17) * grid.highLow) * grid.holes +
-      (hp(39) + hp(18) * grid.aggHeight + hp(19) * grid.bumpiness + hp(20) * grid.holes + hp(21) * grid.fullLines + hp(22) * grid.aggLow + hp(23) * grid.highLow) * grid.fullLines +
-      (hp(40) + hp(24) * grid.aggHeight + hp(25) * grid.bumpiness + hp(26) * grid.holes + hp(27) * grid.fullLines + hp(28) * grid.aggLow + hp(29) * grid.highLow) * grid.aggLow +
-      (hp(41) + hp(30) * grid.aggHeight + hp(31) * grid.bumpiness + hp(32) * grid.holes + hp(33) * grid.fullLines + hp(34) * grid.aggLow + hp(35) * grid.highLow) * grid.highLow
+  def cost(grid: Grid, remainingUnits: Int): Double = {
+    val baseFeatures = Array[Double](grid.aggHeight, grid.bumpiness, grid.holes, grid.fullLines, grid.aggLow, grid.highLow)
+    val weighters = Array[Double](1.0, grid.aggHeight, grid.bumpiness, grid.holes, grid.fullLines, grid.aggLow, grid.highLow, remainingUnits)
+    dot(hpMatrix.map { hp => dot(hp, baseFeatures) }, weighters)
   }
 
   /**
