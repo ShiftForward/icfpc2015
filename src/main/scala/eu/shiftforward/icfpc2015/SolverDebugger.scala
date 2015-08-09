@@ -24,8 +24,7 @@ object SolverDebugger extends App {
     val solution = solver.play(GameState(grid, units, powerPhrases)).toList
 
     println(s"Solution with seed $seed: ${solution.map(_.ch).mkString}")
-
-    Output(input.id, seed, solutionTag, solver.play(GameState(grid, units, powerPhrases)).toList)
+    Output(input.id, seed, solutionTag, solution)
   }
 
   val endTime = System.currentTimeMillis()

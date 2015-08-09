@@ -29,7 +29,7 @@ object Submit extends App {
       if (cliVerbose) {
         println(s"Solution for $problemFile (seed $seed): ${solution.map(_.ch).mkString}")
       }
-      Output(input.id, seed, solutionTag, solver.play(GameState(grid, units, powerPhrases)).toList)
+      Output(input.id, seed, solutionTag, solution)
     }
   }
 
