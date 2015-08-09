@@ -118,7 +118,7 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
               if (powerPhrasesToTry.isEmpty) {
                 // if there are no more power words to try, stop optimizing and execute the previously calculated
                 // shortest path
-                currState.nextState(PowerPhrase.getBestString(currentPath, currState.powerPhrases))
+                currState.nextState(currentPath)
               } else {
                 // obtain the next power phrase to try
                 val powerPhrase = powerPhrasesToTry.next()
@@ -165,7 +165,7 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     }
 
     // play! :)
-    playAux(initialState)
+    PowerPhrase.getBestString(playAux(initialState), powerPhrases).map(Command.char)
   }
 
   val hpMatrix = hp.toList.sliding(6, 6).map(_.toArray).toArray
