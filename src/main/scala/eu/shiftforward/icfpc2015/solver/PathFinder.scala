@@ -6,7 +6,7 @@ import eu.shiftforward.icfpc2015.model._
 import scala.collection.mutable
 
 trait PathFindingUtils {
-  lazy val commandsToTest = PathFindingUtils.commandsToTest
+  lazy val commandsToTest = PathFindingUtils.reverseCommandsToTest
   lazy val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
   def pathFindingLoop(from: UnitPos, to: UnitPos, grid: Grid) {
@@ -21,21 +21,20 @@ trait PathFindingUtils {
       if (!pq.isEmpty) {
         val (_, currentPos) = pq.dequeue
         val dist = if (currentPos == from) 0 else prev(currentPos)._3
-        if (currentPos != to) {
-          commandsToTest.foreach { command =>
-            transform(currentPos, command, grid).foreach { nextPos =>
-              if ((!prev.contains(nextPos) || prev(nextPos)._3 > dist + 1) && nextPos != from) {
-                prev.update(nextPos, (currentPos, command, dist + 1))
-                pq.enqueue((dist + 1 + nextPos.pos.distance(to.pos), nextPos))
-              }
+        commandsToTest.foreach { command =>
+          transform(currentPos, command, grid).foreach { nextPos =>
+            if ((!prev.contains(nextPos) || prev(nextPos)._3 > dist + 1) && nextPos != from) {
+              prev.update(nextPos, (currentPos, command, dist + 1))
+              pq.enqueue((dist + 1 /* + nextPos.pos.distance(to.pos)*/ , nextPos))
             }
           }
-          loop()
         }
+        loop()
       }
     }
 
-    loop()
+    if (!prev.contains(from))
+      loop()
   }
 
   def buildPath(from: UnitPos, to: UnitPos): List[Command] = {
@@ -59,11 +58,12 @@ trait PathFindingUtils {
   def path(from: UnitPos, to: UnitPos, grid: Grid): Option[List[Command]] = {
     if (!fits(to, grid) || !fits(from, grid))
       None
+    else if (from == to) Some(List())
     else {
-      pathFindingLoop(to, from, grid)
+      pathFindingLoop(from, to, grid)
 
-      prev.get(from) match {
-        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
+      prev.get(to) match {
+        case Some(_) => Some(buildPath(from, to).reverse)
         case None => None
       }
     }
@@ -87,6 +87,11 @@ class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
   def pathTo(to: UnitPos): Option[List[Command]] = path(from, to, grid)
 }
 
-class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
-  def pathFrom(from: UnitPos): Option[List[Command]] = path(from, to, grid)
+class ReversePathFinder(grid: Grid, to: UnitPos) {
+  val pathFinder = new PathFinder(grid, to) {
+    override lazy val commandsToTest = PathFindingUtils.commandsToTest
+  }
+
+  def pathFrom(from: UnitPos): Option[List[Command]] =
+    pathFinder.path(to, from, grid).map(_.reverse.map(PathFindingUtils.invertedCommands))
 }
