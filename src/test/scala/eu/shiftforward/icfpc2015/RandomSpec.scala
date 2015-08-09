@@ -2,8 +2,6 @@ package eu.shiftforward.icfpc2015
 
 import org.specs2.mutable.Specification
 
-import eu.shiftforward.icfpc2015.Utils
-
 class RandomSpec extends Specification {
 
   "The Linear Congruential Generator" should {

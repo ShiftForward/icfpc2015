@@ -118,7 +118,7 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
               if (powerPhrasesToTry.isEmpty) {
                 // if there are no more power words to try, stop optimizing and execute the previously calculated
                 // shortest path
-                currState.nextState(PowerPhrase.getBestString(currentPath, currState.powerPhrases))
+                currState.nextState(currentPath)
               } else {
                 // obtain the next power phrase to try
                 val powerPhrase = powerPhrasesToTry.next()
@@ -165,11 +165,15 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     }
 
     // play! :)
-    playAux(initialState)
+    PowerPhrase.getBestString(playAux(initialState), powerPhrases).map(Command.char)
   }
 
   val hpMatrix = hp.toList.sliding(6, 6).map(_.toArray).toArray
-  private[this] def dot(x: Array[Double], y: Array[Double]) = x.zip(y).map { case (a, b) => a * b }.sum
+  private[this] def dot(x: Array[Double], y: Array[Double]) = {
+    var acc = 0.0
+    (0 until math.min(x.length, y.length)).foreach { case i => acc += x(i) * y(i) }
+    acc
+  }
   /**
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
@@ -220,13 +224,5 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
 }
 
 object SmartSolver {
-  val defaultHp = Array(
-    0.02, 0.13, -0.87, -0.95, 0.44, 0.15,
-    -0.85, 0.67, 0.38, -0.18, -0.09, 0.54,
-    0.2, 0.33, -0.43, 0.95, 0.16, 0.87,
-    0.61, 0.22, 0.73, -0.68, -0.7, 0.27,
-    -0.28, 0.4, -0.73, 0.39, -0.88, -0.48,
-    0.81, -0.02, 0.47, -0.99, -0.09, 0.03,
-    -0.93, -0.8, 0.48, -0.21, -0.15, 0.41,
-    0, 0, 0, 0, 0, 0)
+  val defaultHp = Array(-0.23, -0.01, -0.6, -0.93, 0.27, 0.97, -0.69, -0.83, 0.85, -0.42, 0.35, -0.24, 0.38, 0.16, -0.46, -0.85, 0.58, 0.87, 0.32, 0.98, 0.26, -0.31, -0.95, -0.7, -0.98, -0.44, -0.48, -0.16, -0.3, -0.91, 0.07, -0.66, 0.88, -0.96, -0.07, -0.06, -0.96, 0.57, 1.0, 0.74, -0.71, 0.93, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 }
