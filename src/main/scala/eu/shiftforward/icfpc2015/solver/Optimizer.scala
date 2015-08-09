@@ -61,7 +61,7 @@ object GeneticOptimizer extends Optimizer {
 
     def newSpecimen(len: Int): Specimen = specimenBuilder(Stream.continually(geneGenerator()).take(len))
 
-    def randomPool(archetype: Specimen): Pool = {
+    def randomPool(archetype: Specimen, population: Int = population): Pool = {
       (1 to population).map(_ => newSpecimen(archetype.length)).toList
     }
 
@@ -118,8 +118,10 @@ object GeneticOptimizer extends Optimizer {
       }.sum
     }
 
+    val population = 64
+
     val petri = new GeneticExploration(
-      0.05, 0.5, 64, // rate of mutation, crossover ratio, max population
+      0.05, 0.5, population, // rate of mutation, crossover ratio, max population
       () => (Random.nextDouble() - 0.5) * 2, // random gene pool
       _ => (Random.nextDouble() - 0.5) * 2, // gene mutator
       cs => cs.map(v => (math rint v * 100) / 100).toArray, // how to build a specimen from genes
@@ -128,7 +130,15 @@ object GeneticOptimizer extends Optimizer {
       (iter, _) => iter > 20 // the stop condition
     )
 
-    val best = petri.evolution(petri.toMatePool(petri.randomPool(Array.fill(hyperparametersLenght)(0.5))))._1.maxBy(_._2)
+    // Preserve previous runs...
+    val knowledgePool = List[Specimen](
+      Array(0.21, 0.74, 0.96, 0.72, -0.8, 0.19, 0.7, 0.69, 0.61, 0.17, 0.08, -0.9, 0.87, -0.49, -0.64, -0.84, 0.74, 0.57, 0.52, -0.51, -0.26, -0.85, -0.24, 0.45, 0.49, -0.46, 0.54, 0.92, -0.06, -0.75, 0.64, 0.66, 0.59, 0.79, -0.15, 0.88, -0.23, 0.01, 0.04, -0.59, -0.19, -0.49),
+      Array(-0.14, 0.67, 0.38, 0.33, -0.09, -0.07, -0.83, 0.33, -0.43, 0.95, 0.16, 0.87, 0.61, -0.05, 0.62, -0.51, 0.57, 0.95, 0.73, 0.4, -0.4, -0.39, -0.49, -0.48, 0.81, -0.05, 0.47, 0.44, -0.52, 0.03, 0.91, -0.85, 0.48, -0.21, -0.15, 0.41, 0.02, 0.53, -0.87, -0.95, 0.15, -0.6)
+    )
+
+    val best = petri.evolution(petri.toMatePool(
+      knowledgePool ++ petri.randomPool(Array.fill(hyperparametersLenght)(0.5), population - knowledgePool.length))
+    )._1.maxBy(_._2)
 
     println(f"DONE\tBest Fit ${best._2}\tSpecimen ${best._1.toList}")
 
