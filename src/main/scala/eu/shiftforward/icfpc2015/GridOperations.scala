@@ -15,9 +15,13 @@ object GridOperations {
     grid.filled(unitPos.cells.toList: _*)
 
   def removeLines(grid: Grid): (Grid, Int) = {
-    val removedGrid = grid.grid.filterNot(_.forall(identity))
-    val removedLines = grid.height - removedGrid.length
-    (grid.copy(grid = Array.ofDim[Boolean](removedLines, grid.width) ++ removedGrid), removedLines)
+    val linesToRemove = grid.lineCount.count(_ == grid.width)
+    if (linesToRemove == 0)
+      (grid, 0)
+    else {
+      val removedGrid = grid.grid.zipWithIndex.filterNot { case (r, i) => grid.lineCount(i) != grid.width }.map(_._1)
+      (Grid(grid.width, grid.height, Array.ofDim[Boolean](linesToRemove, grid.width) ++ removedGrid), linesToRemove)
+    }
   }
 
   def initialPosition(unitPos: CellUnit, grid: Grid): Option[UnitPos] = {
