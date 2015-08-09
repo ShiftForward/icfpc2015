@@ -17,14 +17,23 @@ import scala.collection.mutable
 } */
 
 final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
-  private[this] def colHeight(c: Int) = {
-    val h = grid.indexWhere(_(c))
-    if (h < 0) 0 else height - h
-  }
-
   lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
-    val firstHeight = colHeight(0)
-    val firstHoles = (1 to firstHeight).count { h => !grid(height - h)(0) }
+    def heightAndHoles(c: Int): (Int, Int) = {
+      var h = -1
+      var holes = 0
+
+      (0 until height).foreach { row =>
+        if (grid(row)(c) && h == -1)
+          h = row
+
+        if (h != -1 && !grid(row)(c))
+          holes += 1
+      }
+
+      (if (h < 0) 0 else height - h, holes)
+    }
+
+    val (firstHeight, firstHoles) = heightAndHoles(0)
     val firstFilledLines = ((height - firstHeight) until height).filter { row => grid(row)(0) }
     var col = 1
     var maxHeight = firstHeight
@@ -34,11 +43,11 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     var linesAcc = firstFilledLines.toList
     var oldHeight = firstHeight
     while (col < width) {
-      val newHeight = colHeight(col)
+      val (newHeight, newHoles) = heightAndHoles(col)
       maxHeight = math.max(newHeight, maxHeight)
       minHeight = math.min(newHeight, minHeight)
       bumpAcc += math.abs(newHeight - oldHeight)
-      holesAcc += (1 to newHeight).count { h => !grid(height - h)(col) }
+      holesAcc += newHoles
       linesAcc = linesAcc.filter { row => grid(row)(col) }
       oldHeight = newHeight
       col += 1
