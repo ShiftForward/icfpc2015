@@ -25,7 +25,7 @@ def print_sol(sol)
 end
 
 def print_problem_status(prob_id, force_cache = false)
-  refresh_sols if force_cache || Time.now > $last_update + 2
+  refresh_sols if force_cache || Time.now > $last_update + 120
   $solutions[prob_id].take(20).each { |s| print_sol(s) }
   nil
 end
