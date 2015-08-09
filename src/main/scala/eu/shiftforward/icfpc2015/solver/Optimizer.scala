@@ -129,7 +129,7 @@ object GeneticOptimizer extends Optimizer {
       }.sum
     }
 
-    val population = 128
+    val population = 40
 
     val petri = new GeneticExploration(
       0.05, 0.5, population, // rate of mutation, crossover ratio, max population
@@ -280,5 +280,5 @@ object GeneticOptimizer extends Optimizer {
 }
 
 object OptimizerMain extends App {
-  println(GeneticOptimizer.optimize(args, 20))
+  println(GeneticOptimizer.optimize(args, 50))
 }
