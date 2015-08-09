@@ -11,7 +11,7 @@ case class Output(problemId: Int,
 object Output {
   implicit val commandJsonFormat = lift {
     new JsonWriter[List[Command]] {
-      def write(commands: List[Command]) = JsString(PowerPhrase.getBestString(commands))
+      def write(commands: List[Command]) = JsString(commands.mkString)
     }
   }
 

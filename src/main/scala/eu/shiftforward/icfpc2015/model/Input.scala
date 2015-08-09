@@ -31,7 +31,7 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     var minHeight = firstHeight
     var bumpAcc = 0
     var holesAcc = firstHoles
-    val linesAcc = mutable.HashSet(firstFilledLines: _*)
+    var linesAcc = firstFilledLines.toList
     var oldHeight = firstHeight
     while (col < width) {
       val newHeight = colHeight(col)
@@ -39,7 +39,7 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
       minHeight = math.min(newHeight, minHeight)
       bumpAcc += math.abs(newHeight - oldHeight)
       holesAcc += (1 to newHeight).count { h => !grid(height - h)(col) }
-      linesAcc.retain { row => grid(row)(col) }
+      linesAcc = linesAcc.filter { row => grid(row)(col) }
       oldHeight = newHeight
       col += 1
     }

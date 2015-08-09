@@ -14,7 +14,8 @@ object PowerPhrase {
     PowerPhrase("Ei!"), // from statement
     PowerPhrase("Ia! Ia!"), // from problem 3 grid
     PowerPhrase("R'lyeh"), // from problem 5 grid
-    PowerPhrase("Yuggoth")) // from problem 7 grid
+    PowerPhrase("Yuggoth"), // from problem 7 grid
+    PowerPhrase("Tsathoggua")) // https://twitter.com/ICFPContest2015/status/630300070236139520
 
   def getMatchings(source: Seq[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
