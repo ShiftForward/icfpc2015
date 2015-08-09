@@ -20,8 +20,8 @@ object Interactive extends App {
   val smartSolver = new SmartSolver // TODO refactor this
 
   def clearPreviousLines(lineCount: Int): Unit = {
-    print(String.format("\033[%sA", (lineCount + 2).toString))
-    print(String.format("\033[2J"))
+    print(String.format("\u001b[%sA", (lineCount + 2).toString))
+    print(String.format("\u001b[2J"))
   }
 
   val upString = new String(Array[Byte](27, 91, 65))
