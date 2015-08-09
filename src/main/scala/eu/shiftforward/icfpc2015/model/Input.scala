@@ -34,7 +34,6 @@ case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]], lineCount:
     }
 
     val (firstHeight, firstHoles) = heightAndHoles(0)
-    val firstFilledLines = ((height - firstHeight) until height).filter { row => grid(row)(0) }
     var col = 1
     var maxHeight = firstHeight
     var minHeight = firstHeight
