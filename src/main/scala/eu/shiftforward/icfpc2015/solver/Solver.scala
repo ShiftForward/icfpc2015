@@ -45,20 +45,8 @@ object NaivePowerPhrasesSolver extends Solver {
   }
 }
 
-// TODO naming!
-class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends Solver {
-  def this() {
-    this(Array(
-      0.02, 0.13, -0.87, -0.95, 0.44, 0.15,
-      -0.85, 0.67, 0.38, -0.18, -0.09, 0.54,
-      0.2, 0.33, -0.43, 0.95, 0.16, 0.87,
-      0.61, 0.22, 0.73, -0.68, -0.7, 0.27,
-      -0.28, 0.4, -0.73, 0.39, -0.88, -0.48,
-      0.81, -0.02, 0.47, -0.99, -0.09, 0.03,
-      -0.93, -0.8, 0.48, -0.21, -0.15, 0.41,
-      0, 0, 0, 0, 0, 0))
-  }
-
+class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
+                  debugOnGameOver: Boolean = true) extends Solver {
   /**
    * The list of commands to test when an unit is to be locked in place.
    */
@@ -229,4 +217,16 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
         } yield movedCUnit
     }
   }
+}
+
+object SmartSolver {
+  val defaultHp = Array(
+    0.02, 0.13, -0.87, -0.95, 0.44, 0.15,
+    -0.85, 0.67, 0.38, -0.18, -0.09, 0.54,
+    0.2, 0.33, -0.43, 0.95, 0.16, 0.87,
+    0.61, 0.22, 0.73, -0.68, -0.7, 0.27,
+    -0.28, 0.4, -0.73, 0.39, -0.88, -0.48,
+    0.81, -0.02, 0.47, -0.99, -0.09, 0.03,
+    -0.93, -0.8, 0.48, -0.21, -0.15, 0.41,
+    0, 0, 0, 0, 0, 0)
 }
