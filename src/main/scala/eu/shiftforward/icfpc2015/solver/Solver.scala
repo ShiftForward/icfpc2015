@@ -135,7 +135,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
                 if (powerPhrases.isEmpty) {
                   // if there are no more power words to try, stop optimizing and execute the previously calculated
                   // shortest path
-                  currState.nextState(currentPath)
+                  currState.nextState(PowerPhrase.getBestString(currentPath, this.powerPhrases))
                 } else {
                   // obtain the next power phrase to try
                   val powerPhrase = powerPhrases.next()
