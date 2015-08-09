@@ -17,7 +17,7 @@ object PowerPhrase {
     PowerPhrase("Yuggoth"), // from problem 7 grid
     PowerPhrase("Tsathoggua")) // https://twitter.com/ICFPContest2015/status/630300070236139520
 
-  def getMatchings(source: Seq[Command], powerphrases: List[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
+  def getMatchings(source: Seq[Command], powerphrases: Seq[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
     var matching = List[(Int, PowerPhrase)]()
     var matched = Map[PowerPhrase, List[Int]]()
@@ -95,7 +95,7 @@ object PowerPhrase {
     }
   }
 
-  def getBestString(source: Seq[Command], powerPhrases: List[PowerPhrase] = knownPhrases): String = {
+  def getBestString(source: Seq[Command], powerPhrases: Seq[PowerPhrase] = knownPhrases): String = {
     val matchings = getMatchings(source, powerPhrases)
     val finalMatchings = flatten(source.length, matchings)
 

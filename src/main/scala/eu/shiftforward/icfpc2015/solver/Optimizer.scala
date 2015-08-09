@@ -1,7 +1,7 @@
 package eu.shiftforward.icfpc2015.solver
 
 import eu.shiftforward.icfpc2015.GameState
-import eu.shiftforward.icfpc2015.model.{ Grid, Input }
+import eu.shiftforward.icfpc2015.model._
 import spray.json._
 
 import scala.io.Source
@@ -15,13 +15,17 @@ trait Optimizer {
   protected def score(filename: String, hp: Array[Double]) = {
     val input = Source.fromFile(filename).mkString.parseJson.convertTo[Input]
     val solver = new SmartSolver(hp, debugOnGameOver = false)
+
     val score = input.sourceSeeds.map { seed =>
       val units = input.orderedUnitsBySeed(seed)
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
-      val gameState = GameState(grid, units)
+      val powerPhrases = PowerPhrase.knownPhrases
+
+      val gameState = GameState(grid, units, powerPhrases)
       val solution = solver.play(gameState).toList
       gameState.nextState(solution).score.currentScore
     }.sum / input.sourceSeeds.size
+
     OptimizationResult(score, hp)
   }
 
