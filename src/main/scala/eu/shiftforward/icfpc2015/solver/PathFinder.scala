@@ -9,31 +9,32 @@ trait PathFindingUtils {
   lazy val commandsToTest = PathFindingUtils.reverseCommandsToTest
   lazy val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
+  implicit val ordering = new Ordering[(Int, UnitPos)] {
+    def compare(p1: (Int, UnitPos), p2: (Int, UnitPos)) = p1._1 compare p2._1
+  }.reverse
+
+  lazy val pq = mutable.PriorityQueue[(Int, UnitPos)]()
+
   def pathFindingLoop(from: UnitPos, to: UnitPos, grid: Grid) {
-    implicit val ordering = new Ordering[(Int, UnitPos)] {
-      def compare(p1: (Int, UnitPos), p2: (Int, UnitPos)) = p1._1 compare p2._1
-    }.reverse
-
-    val pq = mutable.PriorityQueue[(Int, UnitPos)]()
-    pq.enqueue((0, from))
-
     def loop() {
       if (!pq.isEmpty) {
         val (_, currentPos) = pq.dequeue
         val dist = if (currentPos == from) 0 else prev(currentPos)._3
-        commandsToTest.foreach { command =>
-          transform(currentPos, command, grid).foreach { nextPos =>
-            if ((!prev.contains(nextPos) || prev(nextPos)._3 > dist + 1) && nextPos != from) {
-              prev.update(nextPos, (currentPos, command, dist + 1))
-              pq.enqueue((dist + 1 /* + nextPos.pos.distance(to.pos)*/ , nextPos))
+        if (currentPos != to) {
+          commandsToTest.foreach { command =>
+            transform(currentPos, command, grid).foreach { nextPos =>
+              if ((!prev.contains(nextPos) || prev(nextPos)._3 > dist + 1) && nextPos != from) {
+                prev.update(nextPos, (currentPos, command, dist + 1))
+                pq.enqueue((dist + 1 + nextPos.pos.distance(to.pos), nextPos))
+              }
             }
           }
+          loop()
         }
-        loop()
       }
     }
 
-    if (!prev.contains(from))
+    if (!prev.contains(to))
       loop()
   }
 
@@ -84,6 +85,7 @@ object PathFindingUtils {
 }
 
 class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
+  pq.enqueue((0, from))
   def pathTo(to: UnitPos): Option[List[Command]] = path(from, to, grid)
 }
 
