@@ -131,7 +131,7 @@ object GeneticOptimizer extends Optimizer {
       cs => cs.map(v => (math rint v * 100) / 100).toArray, // how to build a specimen from genes
       cs => { val sum = cs.sum; cs.map(_ / sum) },
       fitness, // the fitness function
-      (iter, _) => iter > 20 // the stop condition
+      (iter, _) => iter > maxIter // the stop condition
     )
 
     // Preserve previous runs...
