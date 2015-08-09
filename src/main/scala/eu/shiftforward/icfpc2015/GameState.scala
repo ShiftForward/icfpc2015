@@ -10,7 +10,7 @@ case class GameState(
     powerPhrases: Seq[PowerPhrase],
     unitPosState: Option[UnitPosState],
     status: Status,
-    score: Score = Score(),
+    score: Option[Score] = Some(Score()),
     commandHistory: Vector[Command] = Vector(),
     placedUnits: Int = 0) {
 
@@ -21,9 +21,9 @@ case class GameState(
     case GameOver => copy(status = Failed)
     case Running =>
       val nextCommandHistory = commandHistory :+ command
-      val powerPhrasesScored = powerPhrases.filter { phrase => nextCommandHistory.endsWith(phrase.movements) }
+      lazy val powerPhrasesScored = powerPhrases.filter { phrase => nextCommandHistory.endsWith(phrase.movements) }
 
-      def getNextUnitPos(nextGrid: Grid, nextScore: Score): GameState = {
+      def getNextUnitPos(nextGrid: Grid, nextScore: Option[Score]): GameState = {
         units match {
           case h :: t =>
             initialPosition(h, nextGrid) match {
@@ -42,16 +42,16 @@ case class GameState(
           transform(pos, command, grid) match {
             case None =>
               val (nextGrid, removedLines) = removeLines(lockCell(pos, grid))
-              val nextScore = score.updateMove(pos.cells.size, removedLines).updatePower(powerPhrasesScored)
+              val nextScore = score.map(_.updateMove(pos.cells.size, removedLines).updatePower(powerPhrasesScored))
               getNextUnitPos(nextGrid, nextScore)
 
             case nextPosOpt @ Some(nextPos) =>
               val updatedUnitState = prevState.update(nextPos)
               if (updatedUnitState.valid) {
-                val nextScore = score.updatePower(powerPhrasesScored)
+                val nextScore = score.map(_.updatePower(powerPhrasesScored))
                 GameState(grid, units, powerPhrases, Some(updatedUnitState), status, nextScore, nextCommandHistory, placedUnits)
               } else
-                GameState(grid, units, powerPhrases, None, Failed, Score(), nextCommandHistory, placedUnits)
+                GameState(grid, units, powerPhrases, None, Failed, score.map { _ => Score() }, nextCommandHistory, placedUnits)
           }
         case None =>
           println("We shouldn't have gotten here!")
@@ -83,16 +83,21 @@ object GameState {
       UnitPosState(newUnitPos, prevStates + unitPos)
   }
 
-  def apply(grid: Grid, units: Seq[CellUnit], powerPhrases: Seq[PowerPhrase]): GameState = {
+  def apply(grid: Grid, units: Seq[CellUnit], powerPhrases: Seq[PowerPhrase]): GameState =
+    apply(grid, units, powerPhrases, countScore = true)
+
+  def apply(grid: Grid, units: Seq[CellUnit], powerPhrases: Seq[PowerPhrase], countScore: Boolean): GameState = {
+    val score = if (countScore) Some(Score()) else None
+
     units match {
       case Nil =>
-        GameState(grid, units, powerPhrases, None, GameOver)
+        GameState(grid, units, powerPhrases, None, GameOver, score)
       case h :: t =>
         initialPosition(h, grid) match {
           case Some(pos) =>
-            GameState(grid, t, powerPhrases, Some(UnitPosState(pos, prevStates = Set(pos))), Running)
+            GameState(grid, t, powerPhrases, Some(UnitPosState(pos, prevStates = Set(pos))), Running, score)
           case None =>
-            GameState(grid, t, powerPhrases, None, GameOver)
+            GameState(grid, t, powerPhrases, None, GameOver, score)
         }
     }
   }

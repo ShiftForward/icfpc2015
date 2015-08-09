@@ -23,7 +23,7 @@ trait Optimizer {
 
       val gameState = GameState(grid, units, powerPhrases)
       val solution = solver.play(gameState).toList
-      gameState.nextState(solution).score.currentScore
+      gameState.nextState(solution).score.get.currentScore
     }.sum / input.sourceSeeds.size
 
     OptimizationResult(score, hp)

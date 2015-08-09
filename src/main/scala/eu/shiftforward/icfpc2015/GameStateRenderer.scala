@@ -50,7 +50,7 @@ object GameStateRenderer {
 
     val statsHeader =
       s"Stats\tH ${state.grid.aggHeight} L ${state.grid.aggLow} HL ${state.grid.highLow} CL ${state.grid.fullLines} HO ${state.grid.holes} BP ${state.grid.bumpiness} UN ${state.placedUnits}\n" +
-        s"Current Score: ${state.score.currentScore}"
+        s"Current Score: ${state.score.fold("?")(_.currentScore.toString)}"
 
     statsHeader + "\n" + asString(state.grid, state.unitPosState.map(_.unitPos)) + "\n" + previousCommands
   }

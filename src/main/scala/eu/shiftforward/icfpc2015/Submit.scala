@@ -24,7 +24,7 @@ object Submit extends App {
     input.sourceSeeds.par.map { seed =>
       val units = input.orderedUnitsBySeed(seed)
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
-      val solution = solver.play(GameState(grid, units, powerPhrases)).toList
+      val solution = solver.play(GameState(grid, units, powerPhrases, countScore = false)).toList
 
       if (cliVerbose) {
         println(s"Solution for $problemFile (seed $seed): ${solution.map(_.ch).mkString}")

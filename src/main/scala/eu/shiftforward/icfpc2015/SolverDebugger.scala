@@ -21,7 +21,7 @@ object SolverDebugger extends App {
     val grid = Grid(input.width, input.height).filled(input.filled: _*)
     val powerPhrases = PowerPhrase.knownPhrases
 
-    val solution = solver.play(GameState(grid, units, powerPhrases)).toList
+    val solution = solver.play(GameState(grid, units, powerPhrases, countScore = false)).toList
 
     println(s"Solution with seed $seed: ${solution.map(_.ch).mkString}")
     Output(input.id, seed, solutionTag, solution)
