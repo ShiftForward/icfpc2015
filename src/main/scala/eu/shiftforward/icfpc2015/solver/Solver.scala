@@ -100,8 +100,9 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
         // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
         val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*)) }
         // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
-        val candidates = unorderedCandidates.minBy(candidateCostFunc) #::
-          unorderedCandidates.sortBy(candidateCostFunc).tail
+        val candidates =
+          if (unorderedCandidates.isEmpty) Stream.empty
+          else unorderedCandidates.minBy(candidateCostFunc) #:: unorderedCandidates.sortBy(candidateCostFunc).tail
 
         // filter out the candidates without a valid path to there, keep both the destination and the path found
         val validCandidates = candidates.flatMap { dest =>
