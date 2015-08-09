@@ -61,14 +61,28 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
   def isFilled(col: Int, row: Int): Boolean = grid(row)(col)
 
   def filled(cells: Cell*) = {
-    val newGrid = grid.map(_.clone())
-    cells.foreach { cell => newGrid(cell.row)(cell.col) = true }
+    val newGrid = grid.map(identity)
+    val cloned = mutable.BitSet()
+    cells.foreach { cell =>
+      if (!cloned(cell.row)) {
+        newGrid(cell.row) = newGrid(cell.row).clone()
+        cloned += cell.row
+      }
+      newGrid(cell.row)(cell.col) = true
+    }
     copy(grid = newGrid)
   }
 
   def removed(cells: Cell*) = {
-    val newGrid = grid.map(_.clone())
-    cells.foreach { cell => newGrid(cell.row)(cell.col) = false }
+    val newGrid = grid.map(identity)
+    val cloned = mutable.BitSet()
+    cells.foreach { cell =>
+      if (!cloned(cell.row)) {
+        newGrid(cell.row) = newGrid(cell.row).clone()
+        cloned += cell.row
+      }
+      newGrid(cell.row)(cell.col) = false
+    }
     copy(grid = newGrid)
   }
 }
