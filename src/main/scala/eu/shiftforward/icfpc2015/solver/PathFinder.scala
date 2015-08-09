@@ -6,9 +6,8 @@ import eu.shiftforward.icfpc2015.model._
 import scala.collection.mutable
 
 trait PathFindingUtils {
-  def commandsToTest: Seq[Command]
-
-  def prev: mutable.Map[UnitPos, (UnitPos, Command, Int)]
+  lazy val commandsToTest = PathFindingUtils.commandsToTest
+  lazy val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
 
   def pathFindingLoop(from: UnitPos, to: UnitPos, grid: Grid) {
     implicit val ordering = new Ordering[(Int, UnitPos)] {
@@ -56,6 +55,19 @@ trait PathFindingUtils {
     go(to)
     c.toList
   }
+
+  def path(from: UnitPos, to: UnitPos, grid: Grid): Option[List[Command]] = {
+    if (!fits(to, grid) || !fits(from, grid))
+      None
+    else {
+      pathFindingLoop(to, from, grid)
+
+      prev.get(from) match {
+        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
+        case None => None
+      }
+    }
+  }
 }
 
 object PathFindingUtils {
@@ -72,39 +84,9 @@ object PathFindingUtils {
 }
 
 class PathFinder(grid: Grid, from: UnitPos) extends PathFindingUtils {
-  val commandsToTest = PathFindingUtils.commandsToTest
-
-  val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
-
-  def pathTo(to: UnitPos): Option[List[Command]] = {
-    if (!fits(to, grid))
-      None
-    else {
-      pathFindingLoop(to, from, grid)
-
-      prev.get(from) match {
-        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
-        case None => None
-      }
-    }
-  }
+  def pathTo(to: UnitPos): Option[List[Command]] = path(from, to, grid)
 }
 
 class ReversePathFinder(grid: Grid, to: UnitPos) extends PathFindingUtils {
-  val commandsToTest = PathFindingUtils.commandsToTest
-
-  val prev = mutable.Map[UnitPos, (UnitPos, Command, Int)]()
-
-  def pathFrom(from: UnitPos): Option[List[Command]] = {
-    if (!fits(to, grid) || !fits(from, grid))
-      None
-    else {
-      pathFindingLoop(to, from, grid)
-
-      prev.get(from) match {
-        case Some(_) => Some(buildPath(to, from).map(PathFindingUtils.invertedCommands))
-        case None => None
-      }
-    }
-  }
+  def pathFrom(from: UnitPos): Option[List[Command]] = path(from, to, grid)
 }
