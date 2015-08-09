@@ -43,15 +43,18 @@ object RandomOptimizer extends Optimizer {
 }
 
 object GeneticOptimizer extends Optimizer {
-  class GeneticExploration[Gene, Specimen](val mutationRate: Double,
-                                           val crossOverRate: Double,
-                                           val population: Int,
-                                           geneGenerator: () => Gene,
-                                           geneMutator: Gene => Gene,
-                                           specimenBuilder: Iterable[Gene] => Specimen,
-                                           specimenFixer: Specimen => Specimen,
-                                           fitnessF: Specimen => Long,
-                                           stopCondition: (Int, List[Specimen]) => Boolean)(implicit ev1: Specimen => Iterable[Gene]) {
+  type Specimen = Array[Double]
+  type Gene = Double
+
+  class GeneticExploration(mutationRate: Double,
+                           crossOverRate: Double,
+                           population: Int,
+                           geneGenerator: () => Gene,
+                           geneMutator: Gene => Gene,
+                           specimenBuilder: Iterable[Gene] => Specimen,
+                           specimenFixer: Specimen => Specimen,
+                           fitnessF: Specimen => Long,
+                           stopCondition: (Int, List[Specimen]) => Boolean)(implicit ev1: Specimen => Iterable[Gene]) {
 
     type Pool = List[Specimen]
     type MatePool = List[(Specimen, Long)]
@@ -59,7 +62,7 @@ object GeneticOptimizer extends Optimizer {
     def newSpecimen(len: Int): Specimen = specimenBuilder(Stream.continually(geneGenerator()).take(len))
 
     def randomPool(archetype: Specimen): Pool = {
-      (1 to population).map(_ => newSpecimen(archetype.size)).toList
+      (1 to population).map(_ => newSpecimen(archetype.length)).toList
     }
 
     implicit def toMatePool(p: Pool): MatePool = matePool(p)
@@ -79,7 +82,7 @@ object GeneticOptimizer extends Optimizer {
       pool.zip(fitnesses)
     }
 
-    @inline private[this] def renormalize(vector: Array[Long]): Array[Double] = {
+    @inline private[this] def renormalize(vector: Array[Long]) = {
       val sum = vector.sum
       vector.map(_.toDouble / sum)
     }
@@ -88,8 +91,9 @@ object GeneticOptimizer extends Optimizer {
       val normalizedPool = matePool.map(_._1).zip(renormalize(matePool.map(_._2).toArray))
 
       // Always preserve the better specimen (elitist)
-      (matePool.maxBy(_._2)._1 +: (1 until population).par.map(_ =>
-        crossover(monteCarlo(normalizedPool), monteCarlo(normalizedPool)))).toList
+      (matePool.maxBy(_._2)._1 +:
+        (1 until population).par.map(_ => crossover(monteCarlo(normalizedPool), monteCarlo(normalizedPool)))
+      ).toList
     }
 
     private[this] def monteCarlo[A](weightedList: List[(A, Double)]): A =
@@ -108,17 +112,14 @@ object GeneticOptimizer extends Optimizer {
   }
 
   def optimize(filenames: Array[String], maxIter: Int) = {
-    type Specimen = Array[Double]
-    type Gene = Double
-
     def fitness(s: Specimen): Long = {
       filenames.map { filename =>
         score(filename, s).score
       }.sum
     }
 
-    val petri = new GeneticExploration[Gene, Specimen](
-      0.1, 0.5, 64, // rate of mutation, crossover ratio, max population
+    val petri = new GeneticExploration(
+      0.05, 0.5, 64, // rate of mutation, crossover ratio, max population
       () => (Random.nextDouble() - 0.5) * 2, // random gene pool
       g => g + (Random.nextDouble() - 0.5) / 5, // gene mutator
       cs => cs.map(v => (math floor v * 100) / 100).toArray, // how to build a specimen from genes
