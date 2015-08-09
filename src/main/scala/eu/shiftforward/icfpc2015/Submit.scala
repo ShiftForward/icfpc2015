@@ -10,7 +10,6 @@ import spray.json._
 import scala.io.Source
 
 object Submit extends App {
-  val solver: Solver = new SmartSolver
   val solutionTag: Option[String] = None
 
   val cliDryRun = args.contains("--dryrun")
@@ -18,10 +17,11 @@ object Submit extends App {
 
   val powerPhrases = PowerPhrase.knownPhrases
 
-  val sols = new File("problems").listFiles.flatMap { problemFile =>
+  val sols = new File("problems").listFiles.par.flatMap { problemFile =>
     val input = Source.fromFile(problemFile).mkString.parseJson.convertTo[Input]
+    val solver = new SmartSolver(GeneticOptimizer.knowledgePool(input.id))
 
-    input.sourceSeeds.map { seed =>
+    input.sourceSeeds.par.map { seed =>
       val units = input.orderedUnitsBySeed(seed)
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
       val solution = solver.play(GameState(grid, units, powerPhrases)).toList
@@ -31,7 +31,7 @@ object Submit extends App {
       }
       Output(input.id, seed, solutionTag, solution)
     }
-  }
+  }.seq
 
   if (!cliDryRun) {
     Client.submit(sols) match {
