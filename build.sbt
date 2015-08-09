@@ -27,3 +27,7 @@ scalacOptions ++= Seq(
   "-language:higherKinds")
 
 Revolver.settings
+
+test in assembly := {}
+
+mainClass in assembly := Some("eu.shiftforward.icfpc2015.Main")
