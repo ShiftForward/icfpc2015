@@ -102,11 +102,14 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
           val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
 
           // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-          //val candidates = possibleTargets(state).sortBy { newUnitPos =>
-          val candidates = Utils.insertionSortBy(possibleTargets(state), { newUnitPos: UnitPos =>
+          val targets = possibleTargets(state)
+          val candidates = targets.minBy { newUnitPos =>
             val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
             cost(newGrid)
-          })
+          } #:: possibleTargets(state).sortBy { newUnitPos =>
+            val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
+            cost(newGrid)
+          }.tail
 
           // filter out the candidates without a valid path to there, keep both the destination and the path found
           val validCandidates = candidates.flatMap { dest =>
@@ -141,7 +144,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
 
                   // find a path from that position to the destination
                   revPathFinder.pathFrom(unitPosAfterPower) match {
-                  // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                    // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
                     case Some(pathAfterPower) =>
                       // if there is a path, obtain the game state after applying the power commands
                       val newState = currState.nextState(powerCommands)
