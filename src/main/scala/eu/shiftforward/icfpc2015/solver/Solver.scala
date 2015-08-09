@@ -94,16 +94,14 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
       case GameState.Running =>
         val pathFinder = new PathFinder(state.grid, state.unitPosState.get.unitPos)
 
-        // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
-        val targets = possibleTargets(state)
+        // retrieve all possible final destinations for the current unit
+        val unorderedCandidates = possibleTargets(state)
 
-        val candidates = targets.minBy { newUnitPos =>
-          val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-          cost(newGrid)
-        } #:: possibleTargets(state).sortBy { newUnitPos =>
-          val newGrid = state.grid.filled(newUnitPos.cells.toSeq: _*)
-          cost(newGrid)
-        }.tail
+        // list the candidates ordered from the best to the worst, regardless of whether there a path to there or not
+        val candidateCostFunc = { unitPos: UnitPos => cost(state.grid.filled(unitPos.cells.toSeq: _*)) }
+        // val candidates = unorderedCandidates.sortBy(candidateCostFunc)
+        val candidates = unorderedCandidates.minBy(candidateCostFunc) #::
+          unorderedCandidates.sortBy(candidateCostFunc).tail
 
         // filter out the candidates without a valid path to there, keep both the destination and the path found
         val validCandidates = candidates.flatMap { dest =>
