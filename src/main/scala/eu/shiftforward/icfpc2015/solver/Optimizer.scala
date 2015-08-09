@@ -100,11 +100,18 @@ object GeneticOptimizer extends Optimizer {
       ).toList
     }
 
-    private[this] def monteCarlo[A](weightedList: List[(A, Double)]): A =
-      weightedList(Random.nextInt(weightedList.length)) match {
-        case (s, f) if f > Random.nextFloat => s
-        case _ => monteCarlo(weightedList)
+    private[this] def monteCarlo[A](weightedList: List[(A, Double)]): A = {
+      def go(xs: List[(A, Double)], r: Double): A = {
+        xs match {
+          case Nil => throw new IllegalArgumentException("Calling monteCarlo on an empty list!")
+          case (h, _) :: Nil => h
+          case (h, v) :: t =>
+            if (r < v) h
+            else go(xs.tail, r - v)
+        }
       }
+      go(weightedList, Random.nextFloat)
+    }
 
     private[this] def crossover(a: Specimen, b: Specimen): Specimen =
       mutate(specimenBuilder(a.zip(b).map(gene =>
