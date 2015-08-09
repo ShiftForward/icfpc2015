@@ -169,7 +169,8 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
   }
 
   val hpMatrix = hp.toList.sliding(6, 6).map(_.toArray).toArray
-  private[this] def dot(x: Array[Double], y: Array[Double]) = x.zip(y).map { case (a, b) => a * b }.sum
+  private[this] def dot(x: Array[Double], y: Array[Double]) =
+    (0 until math.min(x.length, y.length)).map { case i => x(i) * y(i) }.sum
   /**
    * Returns the cost of a grid. Lower values correspond to better grids.
    */
