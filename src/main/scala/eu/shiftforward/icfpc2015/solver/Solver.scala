@@ -141,7 +141,7 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
 
                   // find a path from that position to the destination
                   revPathFinder.pathFrom(unitPosAfterPower) match {
-                  // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                    // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
                     case Some(pathAfterPower) =>
                       // if there is a path, obtain the game state after applying the power commands
                       val newState = currState.nextState(powerCommands)
