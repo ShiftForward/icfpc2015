@@ -19,7 +19,7 @@ object GridOperations {
     if (linesToRemove == 0)
       (grid, 0)
     else {
-      val removedGrid = grid.grid.zipWithIndex.filterNot { case (r, i) => grid.lineCount(i) != grid.width }.map(_._1)
+      val removedGrid = grid.grid.zipWithIndex.filter { case (r, i) => grid.lineCount(i) != grid.width }.map(_._1)
       (Grid(grid.width, grid.height, Array.ofDim[Boolean](linesToRemove, grid.width) ++ removedGrid), linesToRemove)
     }
   }
