@@ -45,7 +45,7 @@ object Main extends App {
     input.sourceSeeds.par.map { seed =>
       val units = input.orderedUnitsBySeed(seed)
       val grid = Grid(input.width, input.height).filled(input.filled: _*)
-      val solution = solver.play(GameState(grid, units, options.phrasesOfPower)).toList
+      val solution = solver.play(GameState(grid, units, options.phrasesOfPower), options.timeLimit).toList
       Output(input.id, seed, None, solution)
     }
   }.seq
