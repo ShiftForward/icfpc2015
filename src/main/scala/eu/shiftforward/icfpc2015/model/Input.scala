@@ -16,7 +16,7 @@ import scala.collection.mutable
   }
 } */
 
-final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
+case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]], lineCount: Array[Int]) {
   lazy val (aggHeight, aggLow, bumpiness, holes, fullLines) = {
     def heightAndHoles(c: Int): (Int, Int) = {
       var h = -1
@@ -40,7 +40,6 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
     var minHeight = firstHeight
     var bumpAcc = 0
     var holesAcc = firstHoles
-    var linesAcc = firstFilledLines.toList
     var oldHeight = firstHeight
     while (col < width) {
       val (newHeight, newHoles) = heightAndHoles(col)
@@ -48,11 +47,10 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
       minHeight = math.min(newHeight, minHeight)
       bumpAcc += math.abs(newHeight - oldHeight)
       holesAcc += newHoles
-      linesAcc = linesAcc.filter { row => grid(row)(col) }
       oldHeight = newHeight
       col += 1
     }
-    (maxHeight, minHeight, bumpAcc, holesAcc, linesAcc.size)
+    (maxHeight, minHeight, bumpAcc, holesAcc, lineCount.count(_ == width))
   }
 
   lazy val highLow = aggHeight - aggLow
@@ -62,6 +60,7 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
 
   def filled(cells: Cell*) = {
     val newGrid = grid.map(identity)
+    val newLineCount = lineCount.clone()
     val cloned = mutable.BitSet()
     cells.foreach { cell =>
       if (!cloned(cell.row)) {
@@ -69,12 +68,15 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
         cloned += cell.row
       }
       newGrid(cell.row)(cell.col) = true
+      if (!grid(cell.row)(cell.col))
+        newLineCount(cell.row) += 1
     }
-    copy(grid = newGrid)
+    copy(grid = newGrid, lineCount = newLineCount)
   }
 
   def removed(cells: Cell*) = {
     val newGrid = grid.map(identity)
+    val newLineCount = lineCount.clone()
     val cloned = mutable.BitSet()
     cells.foreach { cell =>
       if (!cloned(cell.row)) {
@@ -82,13 +84,17 @@ final case class Grid(width: Int, height: Int, grid: Array[Array[Boolean]]) {
         cloned += cell.row
       }
       newGrid(cell.row)(cell.col) = false
+      if (grid(cell.row)(cell.col))
+        newLineCount(cell.row) -= 1
     }
-    copy(grid = newGrid)
+    copy(grid = newGrid, lineCount = newLineCount)
   }
 }
 
 object Grid {
   def apply(width: Int, height: Int): Grid = Grid(width, height, Array.ofDim[Boolean](height, width))
+  def apply(width: Int, height: Int, grid: Array[Array[Boolean]]): Grid =
+    Grid(width, height, grid, grid.map(_.count(identity)))
 }
 
 final case class Cube(x: Int, y: Int, z: Int) {
