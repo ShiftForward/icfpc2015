@@ -209,14 +209,18 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
       case None => Stream.empty
       case Some(cUnit) =>
         for {
-          // TODO this positions probably should take the bounding box and pivot into account
-          col <- (state.grid.width - 1 to 0 by -1).toStream
-          row <- (state.grid.height - 1 to cUnit.pos.row by -1).toStream
-          movedCUnit = cUnit.copy(pos = Cell(col, row))
-          rotatedCUnit <- Stream.iterate(movedCUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
-          if GridOperations.fits(rotatedCUnit, state.grid)
-          if rotatedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
-        } yield rotatedCUnit
+          rotatedCUnit <- Stream.iterate(cUnit) { prev => GridOperations.transformUnitPos(prev, RotateCW) }.take(5)
+          (Cell(leftCell, topCell), Cell(rightCell, bottomCell)) = rotatedCUnit.unit.boundingBox
+          left = 0 - (leftCell - rotatedCUnit.unit.pivot.col)
+          right = state.grid.width - 1 - (rightCell - rotatedCUnit.unit.pivot.col)
+          top = cUnit.pos.row
+          bottom = state.grid.height - 1 - (bottomCell - rotatedCUnit.unit.pivot.row)
+          col <- (right to left by -1).toStream
+          row <- (bottom to top by -1).toStream
+          movedCUnit = rotatedCUnit.copy(pos = Cell(col, row))
+          if GridOperations.fits(movedCUnit, state.grid)
+          if movedCUnit.kernel.exists { cell => !GridOperations.cellFits(cell, state.grid) }
+        } yield movedCUnit
     }
   }
 }
