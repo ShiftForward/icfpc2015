@@ -18,7 +18,6 @@ class PowerPhraseSpec extends Specification {
       PowerPhrase.getMatchings(command, List(powerphrase1)) must be_==(
         Map(powerphrase1 -> List(3))
       )
-
     }
 
     "match powerphrases n times in command sequentially" in {
@@ -83,6 +82,9 @@ class PowerPhraseSpec extends Specification {
 
       PowerPhrase.getBestString(Command.string("aeaaaeaa"),
         List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5)) must beEqualTo("aeaaaeaa")
+
+      PowerPhrase.getBestString(Command.string("axexaxaxaxexaxa"), // preserve other chars if no power phrase found
+        List(powerphrase1, powerphrase3, powerphrase2, powerphrase4, powerphrase5)) must beEqualTo("axexaxaxaxexaxa")
     }
   }
 }
