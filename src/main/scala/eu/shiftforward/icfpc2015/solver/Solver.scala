@@ -187,9 +187,11 @@ class SmartSolver(hp: Array[Double], debugOnGameOver: Boolean = true) extends So
         }
     }
 
+    playAux(initialState)
+
     // this is here so that problem 14 terminates
-    if (initialState.grid.width <= 25) playAux(initialState)
-    else NaivePowerPhrasesSolver.play(initialState)
+    //if (initialState.grid.width <= 25) playAux(initialState)
+    //else NaivePowerPhrasesSolver.play(initialState)
   }
 
   /**

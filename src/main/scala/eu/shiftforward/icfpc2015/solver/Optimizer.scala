@@ -47,6 +47,7 @@ object GeneticOptimizer extends Optimizer {
                                            val crossOverRate: Double,
                                            val population: Int,
                                            geneGenerator: () => Gene,
+                                           geneMutator: Gene => Gene,
                                            specimenBuilder: Iterable[Gene] => Specimen,
                                            specimenFixer: Specimen => Specimen,
                                            fitnessF: Specimen => Long,
@@ -103,7 +104,7 @@ object GeneticOptimizer extends Optimizer {
 
     private[this] def mutate(s: Specimen): Specimen =
       specimenBuilder(s.map(gene =>
-        if (mutationRate > Random.nextFloat) geneGenerator() else gene))
+        if (mutationRate > Random.nextFloat) geneMutator(gene) else gene))
   }
 
   def optimize(filenames: Array[String], maxIter: Int) = {
@@ -117,8 +118,10 @@ object GeneticOptimizer extends Optimizer {
     }
 
     val petri = new GeneticExploration[Gene, Specimen](
-      0.05, 0.25, 128, () => (Random.nextDouble() - 0.5) * 2, // rate of mutation, crossover ratio, max population and gene pool
-      cs => cs.toArray, // how to build a specimen from genes
+      0.1, 0.5, 64, // rate of mutation, crossover ratio, max population
+      () => (Random.nextDouble() - 0.5) * 2, // random gene pool
+      g => g + (Random.nextDouble() - 0.5) / 5, // gene mutator
+      cs => cs.map(v => (math floor v * 100) / 100).toArray, // how to build a specimen from genes
       cs => { val sum = cs.sum; cs.map(_ / sum) },
       fitness, // the fitness function
       (iter, _) => iter > 20 // the stop condition
