@@ -122,7 +122,7 @@ object Cell {
   }
 }
 
-case class CellUnit(members: Set[Cell], pivot: Cell) { self =>
+case class CellUnit(members: Set[Cell], pivot: Cell) {
   lazy val rotateCCW = new CellUnit(members.map(_.rotateCCW(pivot)), pivot)
 
   lazy val rotateCW = new CellUnit(members.map(_.rotateCW(pivot)), pivot)
