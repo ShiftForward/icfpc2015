@@ -63,8 +63,6 @@ case class GameState(
     if (moves.isEmpty) this
     else nextState(moves.head).nextState(moves.tail)
 
-  lazy val gameOver = status != Running
-
   lazy val currentUnitPos = unitPosState.map(_.unitPos)
 }
 
