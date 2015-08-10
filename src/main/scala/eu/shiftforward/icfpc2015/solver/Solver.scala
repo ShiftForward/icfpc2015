@@ -57,7 +57,7 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     val startTimeMillis = System.currentTimeMillis()
 
     val safeTimeLimitMillis = timeLimit match {
-      case Some(1) => startTimeMillis + 1000 - 900 // burnin
+      case Some(1) => startTimeMillis + 1000 - 850 // burnin
       case Some(2) => startTimeMillis + 2000 - 700
       case Some(3) => startTimeMillis + 3000 - 750
       case Some(limit) => startTimeMillis + limit * 1000 - 800
@@ -132,44 +132,50 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
                 def optimizeForPower(currState: GameState,
                                      currentPath: Seq[Command],
                                      powerPhrasesToTry: Iterator[PowerPhrase]): GameState = {
-                  if (powerPhrasesToTry.isEmpty) {
-                    // if there are no more power words to try, stop optimizing and execute the previously calculated
-                    // shortest path
+                  if (System.currentTimeMillis() > safeTimeLimitMillis) {
+                    // no time left
                     currState.nextState(currentPath)
                   } else {
-                    // obtain the next power phrase to try
-                    val powerPhrase = powerPhrasesToTry.next()
-                    val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
 
-                    // obtain the position the unit will be after the power phrase (possibly out of the grid)
-                    val unitPosAfterPower = GridOperations.transformUnitPos(
-                      currState.unitPosState.get.unitPos, powerTransform)
+                    if (powerPhrasesToTry.isEmpty) {
+                      // if there are no more power words to try, stop optimizing and execute the previously calculated
+                      // shortest path
+                      currState.nextState(currentPath)
+                    } else {
+                      // obtain the next power phrase to try
+                      val powerPhrase = powerPhrasesToTry.next()
+                      val (powerCommands, powerTransform) = powerPhraseIndex(powerPhrase)
 
-                    // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
+                      // obtain the position the unit will be after the power phrase (possibly out of the grid)
+                      val unitPosAfterPower = GridOperations.transformUnitPos(
+                        currState.unitPosState.get.unitPos, powerTransform)
 
-                    // find a path from that position to the destination
-                    revPathFinder.pathFrom(unitPosAfterPower) match {
-                      // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
-                      case Some(pathAfterPower) =>
-                        // if there is a path, obtain the game state after applying the power commands
-                        val newState = currState.nextState(powerCommands)
+                      // println(s"revPathFinder.pathFrom($unitPosAfterPower) = ${revPathFinder.pathFrom(unitPosAfterPower)}")
 
-                        // the previously calculated position does not take in account locked cells during the power
-                        // phrase commands, only the final position. Test here if the game entered a non-running state or
-                        // the unit we're dealing with was locked
-                        if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
-                          // if something happened, try the next power phrase
+                      // find a path from that position to the destination
+                      revPathFinder.pathFrom(unitPosAfterPower) match {
+                        // new PathFinder(state.grid, unitPosAfterPower).pathTo(dest) match { // slow, need `revPathFinder`!
+                        case Some(pathAfterPower) =>
+                          // if there is a path, obtain the game state after applying the power commands
+                          val newState = currState.nextState(powerCommands)
+
+                          // the previously calculated position does not take in account locked cells during the power
+                          // phrase commands, only the final position. Test here if the game entered a non-running state or
+                          // the unit we're dealing with was locked
+                          if (newState.status != GameState.Running || newState.units.length != currState.units.length) {
+                            // if something happened, try the next power phrase
+                            optimizeForPower(currState, currentPath, powerPhrasesToTry)
+                          } else {
+                            // else, record usage of power phrase and continue optimizing from the new state
+                            unusedPowerPhrases -= powerPhrase
+                            usedPowerPhrases += powerPhrase
+                            optimizeForPower(newState, pathAfterPower, allPowerPhrases)
+                          }
+
+                        case None =>
+                          // if there is not any path, try the next power phrase
                           optimizeForPower(currState, currentPath, powerPhrasesToTry)
-                        } else {
-                          // else, record usage of power phrase and continue optimizing from the new state
-                          unusedPowerPhrases -= powerPhrase
-                          usedPowerPhrases += powerPhrase
-                          optimizeForPower(newState, pathAfterPower, allPowerPhrases)
-                        }
-
-                      case None =>
-                        // if there is not any path, try the next power phrase
-                        optimizeForPower(currState, currentPath, powerPhrasesToTry)
+                      }
                     }
                   }
                 }
