@@ -1,8 +1,7 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.model
 
-import eu.shiftforward.icfpc2015.model._
-import GridOperations._
-import GameState._
+import eu.shiftforward.icfpc2015.model.GameState._
+import eu.shiftforward.icfpc2015.util.GridOperations._
 
 case class GameState(
     grid: Grid,
@@ -30,7 +29,8 @@ case class GameState(
               case None =>
                 GameState(nextGrid, t, powerPhrases, None, GameOver, nextScore, nextCommandHistory, placedUnits + 1)
               case Some(nextPos) =>
-                GameState(nextGrid, t, powerPhrases, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status, nextScore, nextCommandHistory, placedUnits + 1)
+                GameState(nextGrid, t, powerPhrases, Some(UnitPosState(nextPos, prevStates = Set(nextPos))), status,
+                  nextScore, nextCommandHistory, placedUnits + 1)
             }
           case _ =>
             GameState(nextGrid, units, powerPhrases, None, GameOver, nextScore, nextCommandHistory, placedUnits + 1)
@@ -49,9 +49,11 @@ case class GameState(
               val updatedUnitState = prevState.update(nextPos)
               if (updatedUnitState.valid) {
                 val nextScore = score.map(_.updatePower(powerPhrasesScored))
-                GameState(grid, units, powerPhrases, Some(updatedUnitState), status, nextScore, nextCommandHistory, placedUnits)
+                GameState(grid, units, powerPhrases, Some(updatedUnitState), status, nextScore,
+                  nextCommandHistory, placedUnits)
               } else
-                GameState(grid, units, powerPhrases, None, Failed, score.map { _ => Score() }, nextCommandHistory, placedUnits)
+                GameState(grid, units, powerPhrases, None, Failed, score.map { _ => Score() },
+                  nextCommandHistory, placedUnits)
           }
         case None =>
           println("We shouldn't have gotten here!")

@@ -1,6 +1,4 @@
-package eu.shiftforward.icfpc2015
-
-import eu.shiftforward.icfpc2015.model._
+package eu.shiftforward.icfpc2015.model
 
 case class UnitPos(unit: CellUnit, pos: Cell) {
   lazy val cells: Set[Cell] = {

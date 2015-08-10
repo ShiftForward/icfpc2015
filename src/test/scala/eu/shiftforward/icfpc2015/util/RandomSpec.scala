@@ -1,5 +1,6 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.util
 
+import eu.shiftforward.icfpc2015.util.Utils
 import org.specs2.mutable.Specification
 
 class RandomSpec extends Specification {

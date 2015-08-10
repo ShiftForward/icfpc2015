@@ -1,6 +1,4 @@
-package eu.shiftforward.icfpc2015
-
-import eu.shiftforward.icfpc2015.model._
+package eu.shiftforward.icfpc2015.model
 
 final case class Score(currentScore: Long = 0,
                        prevLinesCleared: Int = 0,

@@ -1,4 +1,4 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.model
 
 import eu.shiftforward.icfpc2015.model.{ Command, PowerPhrase }
 import org.specs2.mutable.Specification

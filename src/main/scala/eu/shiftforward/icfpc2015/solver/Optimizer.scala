@@ -1,6 +1,5 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015.GameState
 import eu.shiftforward.icfpc2015.model._
 import spray.json._
 
@@ -218,7 +217,7 @@ object GeneticOptimizer extends Optimizer {
             else go(xs.tail, r - v)
         }
       }
-      go(weightedList, Random.nextFloat)
+      go(weightedList, Random.nextFloat())
     }
 
     private[this] def crossover(a: Specimen, b: Specimen): Specimen =

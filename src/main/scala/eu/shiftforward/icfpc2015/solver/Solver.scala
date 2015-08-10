@@ -1,7 +1,8 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015._
 import eu.shiftforward.icfpc2015.model._
+import eu.shiftforward.icfpc2015.util._
+
 import scala.collection.mutable
 
 trait Solver {

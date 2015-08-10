@@ -1,12 +1,13 @@
 package eu.shiftforward.icfpc2015
 
-import eu.shiftforward.icfpc2015.GameState.UnitPosState
-import eu.shiftforward.icfpc2015.GridOperations._
+import eu.shiftforward.icfpc2015.model.GameState.UnitPosState
 import eu.shiftforward.icfpc2015.model._
 import eu.shiftforward.icfpc2015.solver._
+import eu.shiftforward.icfpc2015.util.GridOperations._
+import eu.shiftforward.icfpc2015.util._
 import spray.json._
 
-import scala.io.{ StdIn, Source }
+import scala.io.{ Source, StdIn }
 import scala.util.Try
 
 object Interactive extends App {

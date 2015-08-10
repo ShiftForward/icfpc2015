@@ -1,8 +1,8 @@
 package eu.shiftforward.icfpc2015.solver
 
-import eu.shiftforward.icfpc2015._
-import eu.shiftforward.icfpc2015.GridOperations._
 import eu.shiftforward.icfpc2015.model._
+import eu.shiftforward.icfpc2015.util.GridOperations._
+
 import scala.collection.mutable
 
 trait PathFindingUtils {
@@ -17,8 +17,8 @@ trait PathFindingUtils {
 
   def pathFindingLoop(from: UnitPos, to: UnitPos, grid: Grid) {
     def loop() {
-      if (!pq.isEmpty) {
-        val (_, currentPos) = pq.dequeue
+      if (pq.nonEmpty) {
+        val (_, currentPos) = pq.dequeue()
         val dist = if (currentPos == from) 0 else prev(currentPos)._3
         if (currentPos != to) {
           commandsToTest.foreach { command =>
