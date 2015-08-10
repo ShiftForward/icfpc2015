@@ -17,7 +17,8 @@ object PowerPhrase {
     PowerPhrase("Yuggoth"), // from problem 7 grid
     PowerPhrase("Tsathoggua"), // https://twitter.com/ICFPContest2015/status/630300070236139520
     PowerPhrase("Yoyodyne"), // https://twitter.com/ICFPContest2015/status/630393114331459588, https://en.wikipedia.org/wiki/The_Adventures_of_Buckaroo_Banzai_Across_the_8th_Dimension
-    PowerPhrase("Blue Hades")) // https://twitter.com/ICFPContest2015/status/629956402031624192, https://laundry-game.obsidianportal.com/wikis/blue-hades
+    PowerPhrase("Blue Hades"), // https://twitter.com/ICFPContest2015/status/629956402031624192, https://laundry-game.obsidianportal.com/wikis/blue-hades
+    PowerPhrase("The Laundry"))
 
   def getMatchings(source: Seq[Command], powerphrases: Seq[PowerPhrase]): Map[PowerPhrase, List[Int]] = {
 
