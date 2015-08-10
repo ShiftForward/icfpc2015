@@ -1,4 +1,4 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.util
 
 import eu.shiftforward.icfpc2015.model._
 
@@ -28,10 +28,9 @@ object GameStateRenderer {
         case (true, false, true) => UnitPivotCell
         case (false, true, false) => FilledCell
         case (false, false, true) => UnitCell
-        case _ => {
+        case _ =>
           println(s"Got an unknown cell! isPivot: $isPivot; isFilled: $isFilled; isUnit: $isUnit")
           UnknownCell
-        }
       }
     }
 

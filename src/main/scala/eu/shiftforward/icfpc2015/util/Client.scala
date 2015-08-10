@@ -1,11 +1,12 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.util
 
 import java.io.ByteArrayInputStream
 
-import spray.json._
-import spray.json.DefaultJsonProtocol._
 import com.typesafe.config.ConfigFactory
 import eu.shiftforward.icfpc2015.model.Output
+import spray.json.DefaultJsonProtocol._
+import spray.json._
+
 import scala.sys.process._
 
 object Client {

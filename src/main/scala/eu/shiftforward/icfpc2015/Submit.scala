@@ -5,6 +5,7 @@ import java.io.File
 import eu.shiftforward.icfpc2015.model.Input._
 import eu.shiftforward.icfpc2015.model._
 import eu.shiftforward.icfpc2015.solver._
+import eu.shiftforward.icfpc2015.util.Client
 import spray.json._
 
 import scala.io.Source

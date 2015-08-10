@@ -30,5 +30,4 @@ object SolverDebugger extends App {
   val endTime = System.currentTimeMillis()
 
   println("Results obtained in " + (endTime - startTime) + " ms")
-
 }

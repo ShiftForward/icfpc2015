@@ -1,4 +1,4 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.util
 
 import eu.shiftforward.icfpc2015.model._
 

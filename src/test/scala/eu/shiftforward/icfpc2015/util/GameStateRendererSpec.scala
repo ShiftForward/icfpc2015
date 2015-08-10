@@ -1,8 +1,9 @@
-package eu.shiftforward.icfpc2015
+package eu.shiftforward.icfpc2015.util
 
 import java.io.File
+import eu.shiftforward.icfpc2015.util.GameStateRenderer
 import spray.json._
-import eu.shiftforward.icfpc2015.model.{ CellUnit, Grid, Input }
+import eu.shiftforward.icfpc2015.model.{GameState, CellUnit, Grid, Input}
 import org.specs2.mutable.Specification
 
 import scala.io.Source
