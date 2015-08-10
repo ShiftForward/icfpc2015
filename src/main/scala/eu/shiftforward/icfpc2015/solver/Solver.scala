@@ -57,7 +57,10 @@ class SmartSolver(hp: Array[Double] = SmartSolver.defaultHp,
     val startTimeMillis = System.currentTimeMillis()
 
     val safeTimeLimitMillis = timeLimit match {
-      case Some(limit) => startTimeMillis + limit * 1000 - 1000
+      case Some(1) => startTimeMillis + 1000 - 900 // burnin
+      case Some(2) => startTimeMillis + 2000 - 700
+      case Some(3) => startTimeMillis + 3000 - 750
+      case Some(limit) => startTimeMillis + limit * 1000 - 800
       case None => Long.MaxValue
     }
 
